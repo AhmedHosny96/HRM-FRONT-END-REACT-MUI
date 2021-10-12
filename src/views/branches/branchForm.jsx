@@ -1,6 +1,6 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { useForm, Form } from "../../views/controls/useForm";
+import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
 import { saveBranch } from "../../services/branchService";
 
@@ -57,6 +57,7 @@ export default function branchForm() {
   const { values, errors, setErrors, handleOnChange } = useForm(initialValues);
   const classes = useStyles();
 
+  //saving data to db
   const postData = async () => {
     const data = { ...values };
     await saveBranch(data);

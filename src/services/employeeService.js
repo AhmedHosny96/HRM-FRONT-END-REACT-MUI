@@ -1,23 +1,23 @@
-import http from './httpService'
+import http from "./httpService";
 
-const URL = 'http://localhost:5000/api/employees/'
+const URL = "http://localhost:5000/api/employees/";
 
 export function getEmployees() {
-  return http.get(URL)
+  return http.get(URL);
 }
 
 export function getEmployee(id) {
-  return http.get(URL + '/' + id)
+  return http.get(URL + "/" + id);
 }
 export function saveEmployee(employee) {
   if (employee._id) {
-    const body = { ...employee }
-    delete body._id
-    return http.put(URL + '/' + employee._id, body)
+    const body = { ...employee };
+    delete body._id;
+    return http.put(URL + "/" + employee._id, body);
   }
-  return http.post(URL, employee)
+  return http.post(URL, employee);
 }
 
 export function deleteEmployee(id) {
-  return http.delete(URL + '/' + id)
+  return http.delete(URL + "/" + id);
 }

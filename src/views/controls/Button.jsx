@@ -16,16 +16,15 @@ export default function useButton(props) {
 
   const { text, onClick, ...rest } = props;
   return (
-    <div className={classes.root}>
-      <Button
-        size="large"
-        variant="contained"
-        color="primary"
-        onClick={onClick}
-        {...rest}
-      >
-        {text}
-      </Button>
-    </div>
+    <Button
+      className={classes.root}
+      size="large"
+      variant="contained"
+      color="primary"
+      onClick={onClick}
+      {...rest}
+    >
+      {text}
+    </Button>
   );
 }
