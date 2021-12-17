@@ -9,28 +9,32 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
-import { getBranches } from "../../services/branchService";
 import BranchForm from "./branchForm";
 import Controls from "../../views/controls/controls";
-import { Search, Add } from "@material-ui/icons/";
-import Popup from "views/controls/Popup";
+import { Search, Add, DeleteOutline } from "@material-ui/icons/";
+import Popup from "../../views/controls/Popup";
+import ConfirmDialog from "../../views/controls/ConfirmDialog";
+import {
+  saveBranch,
+  getBranches,
+  deleteBranch,
+} from "../../services/branchService";
+import Notifications from "views/controls/Notifications";
+
+import { EditOutlined } from "@material-ui/icons/";
 const useStyles = makeStyles((theme) => ({
   pageContent: {
-    margin: theme.spacing(3),
-    padding: theme.spacing(2),
+    margin: theme.spacing(5),
+    padding: theme.spacing(3),
   },
   searchInput: {
-    marginTop: theme.spacing(5),
     width: "40%",
     position: "absolute",
     right: "10px",
   },
   newButton: {
-    "& .MuiButton-label": {
-      textTransform: "none",
-    },
-
-    top: "20px",
+    marginRight: theme.spacing(6),
+    textTransform: "none",
   },
 }));
 
@@ -40,22 +44,33 @@ const headCells = [
   { id: "name", label: "Branch name" },
   { id: "region", label: "Region" },
   { id: "city", label: "City" },
+  { id: "status", label: "Status" },
+
+  { id: "action", label: "Action", disableSort: true },
 ];
 
 export default function branches() {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
-
-  //filter function initially no filter operation
+  0;
+  const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
+  const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
+  const [notify, setNotify] = useState({
+    isOpen: false,
+    message: "",
+    type: "",
+  }); //for alert notifications
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    subTitle: "",
+  });
   const [filterFn, setFilterFn] = useState({
+    //filter function initially no filter operation
     fn: (items) => {
       return items;
     },
   });
-
-  // state variables for dialog pop up\
-
-  const [openPopup, setOpenPopup] = useState(false);
 
   const {
     TableContainer,
@@ -63,6 +78,24 @@ export default function branches() {
     Pagination,
     recordsAfterPagingAndSorting,
   } = useTable(records, headCells, filterFn);
+
+  // posting and update data into db for branchesform
+  const postData = async (employee) => {
+    const data = { ...employee };
+    await saveBranch(data);
+
+    
+    //close the pop
+    setOpenPopup(false);
+    // send notify alert
+    setNotify({
+      isOpen: true,
+      message: "Successfull !",
+      type: "success",
+    });
+
+    fetchData();
+  };
 
   //handling search
 
@@ -82,6 +115,35 @@ export default function branches() {
       },
     });
   };
+
+  //handle delete
+
+  const handleDelete = async (branch) => {
+    setConfirmDialog({
+      ...confirmDialog,
+      isOpen: false,
+    });
+    records.filter((b) => b._id != branch._id);
+    await deleteBranch(branch._id);
+
+    setNotify({
+      isOpen: true,
+      message: "Deleted Successfully!",
+      type: "error",
+    });
+    fetchData();
+  };
+
+  // populate the data into form
+
+  const openInPopup = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //stop populating
+  };
+
   const fetchData = async () => {
     const { data } = await getBranches();
     setRecords(data);
@@ -95,7 +157,7 @@ export default function branches() {
       <Paper className={classes.pageContent}>
         <Toolbar>
           <Controls.Input
-            label="Search ..."
+            label="Search..."
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -109,9 +171,13 @@ export default function branches() {
           <Controls.Button
             text="Add Branch"
             variant="outlined"
+            size="medium"
             className={classes.newButton}
             startIcon={<Add />}
-            onClick={() => setOpenPopup(true)}
+            onClick={() => {
+              setOpenPopup(true);
+              setRecordForEdit(null);
+            }}
           />
         </Toolbar>
 
@@ -123,6 +189,28 @@ export default function branches() {
                 <TableCell>{record.name}</TableCell>
                 <TableCell>{record.region}</TableCell>
                 <TableCell>{record.city}</TableCell>
+                <TableCell>{record.status}</TableCell>
+                <TableCell>
+                  <Controls.ActionButton
+                    color="primary"
+                    onClick={() => openInPopup(record)}
+                  >
+                    <EditOutlined />
+                  </Controls.ActionButton>
+                  <Controls.ActionButton
+                    color="secondary"
+                    onClick={() =>
+                      setConfirmDialog({
+                        isOpen: true,
+                        title: "Are you sure you want to delete this ?",
+                        subTitle: "",
+                        onConfirm: () => handleDelete(record),
+                      })
+                    }
+                  >
+                    <DeleteOutline />
+                  </Controls.ActionButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -134,8 +222,18 @@ export default function branches() {
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >
-        <BranchForm />
+        <BranchForm
+          postData={postData}
+          recordForEdit={recordForEdit}
+          setNotify={setNotify}
+        />
       </Popup>
+
+      <Notifications notify={notify} setNotify={setNotify} />
+      <ConfirmDialog
+        confirmDialog={confirmDialog}
+        setConfirmDialog={setConfirmDialog}
+      />
     </div>
   );
 }

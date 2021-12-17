@@ -16,23 +16,24 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiDialog-paper": {
       padding: theme.spacing(2),
       position: "absolute",
-      top: theme.spacing(2.5),
+      top: theme.spacing(5),
     },
   },
 }));
 
 export default function Popup(props) {
-  const { title, children, openPopup, setOpenPopup, ...rest } = props;
+  const { title, children, openPopup, setOpenPopup, popUpClose } = props;
   const classes = useStyles();
   return (
-    <Dialog open={openPopup} {...rest} className={classes.dialogWrapper}>
+    <Dialog open={openPopup} className={classes.dialogWrapper}>
       <DialogTitle>
         <div style={{ display: "flex" }}>
           <Typography variant="h8" component="div" style={{ flexGrow: 1 }}>
             {title}
           </Typography>
           <Controls.ActionButton
-            color="secondary"
+            disabled={popUpClose}
+            color="primary"
             onClick={() => setOpenPopup(false)}
           >
             <Close />

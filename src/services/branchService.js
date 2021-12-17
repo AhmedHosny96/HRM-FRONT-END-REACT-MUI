@@ -10,6 +10,12 @@ export function getBranch(id) {
 }
 
 export function saveBranch(branch) {
+  if (branch._id) {
+    const body = { ...branch };
+    delete body._id;
+    //update
+    return http.put(api + "/" + branch._id, body);
+  }
   return http.post(api, branch);
 }
 

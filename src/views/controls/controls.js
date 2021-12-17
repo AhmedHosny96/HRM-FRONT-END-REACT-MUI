@@ -1,8 +1,8 @@
 import Input from "../../views/controls/Input";
 import Select from "../../views/controls/Select";
-import Date from "./DatePicker";
+import Date from "../../views/controls/DatePicker";
 import Button from "../../views/controls/Button";
-import ActionButton from "../../views/controls/actionButton";
+import ActionButton from "../../views/controls/ActionButton";
 const Controls = {
   Input,
   Select,

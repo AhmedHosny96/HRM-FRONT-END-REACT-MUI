@@ -1,79 +1,84 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
-import { saveBranch } from "../../services/branchService";
-
+import { getLocations } from "../../views/common/dropDownValues.js";
 // import axios from "axios";
 //custom stylings
 // const api = "http://localhost:5000/api/branches/";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "80%",
-    margin: theme.spacing(5),
-    padding: theme.spacing(2),
+    width: "100%",
+    marginLeft: theme.spacing(3),
   },
 }));
-
-const locations = [
-  "Addis Abeba",
-  "Dire Dawa",
-  "Fafan",
-  "Afdher",
-  "Jarar",
-  "Korahey",
-  "Dollo",
-  "Shabelle ",
-  "Liban",
-  "Dawa",
-  "Nogob",
-  "Erer",
-];
 
 const initialValues = {
   name: "",
   region: "",
   city: "",
+  status: "",
 };
 
-export default function branchForm() {
+const statuses = ["Open", "Closed"];
+
+export default function branchForm(props) {
+  const classes = useStyles();
+  const { postData, recordForEdit, setNotify } = props;
+  
   //validation
 
-  const validate = () => {
-    let temp = {};
-
-    temp.name = values.name ? "" : "Branch name is required";
-    temp.region = values.region ? "" : "Location is required";
-    temp.city = values.city ? "" : "City name is required";
+  const validate = (fieldValues = values) => {
+    let temp = { ...errors };
+    if ("name" in fieldValues)
+      temp.name = fieldValues.name ? "" : "Branch name is required";
+    if ("region" in fieldValues)
+      temp.region = fieldValues.region ? "" : "Location is required";
+    if ("city" in fieldValues)
+      temp.city = fieldValues.city ? "" : "City name is required";
 
     setErrors({
       ...temp,
     });
 
-    return Object.values(temp).every((x) => x == "");
+    if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
+  const { values, setValues, errors, setErrors, handleOnChange } = useForm(
+    initialValues,
+    true,
+    validate
+  );
 
-  const { values, errors, setErrors, handleOnChange } = useForm(initialValues);
-  const classes = useStyles();
+  //populating data into form
+
+  useEffect(() => {
+    //populate if there are records
+
+    if (recordForEdit != null)
+      setValues({
+        ...recordForEdit,
+      });
+  }, [recordForEdit]);
 
   //saving data to db
-  const postData = async () => {
-    const data = { ...values };
-    await saveBranch(data);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validate())
+    if (validate()) {
       try {
-        await postData();
-        window.alert("Sucess !");
+        await postData(values);
       } catch (ex) {
-        window.alert(ex.response.data);
+        setNotify({
+          isOpen: true,
+          message: ex.response.data,
+          type: "warning",
+        });
       }
+    }
   };
+
   return (
     <div className={classes.root}>
       <Form onSubmit={handleSubmit}>
@@ -88,7 +93,7 @@ export default function branchForm() {
           name="region"
           label="Region"
           value={values.region}
-          options={locations}
+          options={getLocations()}
           onChange={handleOnChange}
           error={errors.region}
         />
@@ -98,6 +103,14 @@ export default function branchForm() {
           value={values.city}
           onChange={handleOnChange}
           error={errors.city}
+        />
+        <Controls.Select
+          name="status"
+          label="Status"
+          value={values.status}
+          options={statuses}
+          onChange={handleOnChange}
+          error={errors.status}
         />
 
         <Controls.Button text="Submit" type="submit" />

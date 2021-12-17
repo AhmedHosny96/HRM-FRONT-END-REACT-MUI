@@ -15,6 +15,8 @@ export function saveUser(user) {
     delete body._id;
     return http.put(api + "/" + user._id, body);
   }
+
+  // return http.post(api + "/" + id + "/" + token, user) || http.post(api, user);
   return http.post(api, user);
 }
 

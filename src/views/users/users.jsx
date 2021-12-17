@@ -5,17 +5,22 @@ import {
   TableCell,
   TableRow,
   Toolbar,
-  Grid,
   makeStyles,
   InputAdornment,
 } from "@material-ui/core";
-// import UserForm from "./userForm";
-
+import UserForm from "./userForm";
 import Controls from "../../views/controls/controls";
-import { Search } from "@material-ui/icons/";
-
 import { useTable } from "views/common/useTable";
-import { getUsers } from "./../../services/userService";
+import { getUsers, saveUser } from "./../../services/userService";
+import Popup from "../../views/controls/Popup";
+import Notifications from "../../views/controls/Notifications";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  Add,
+  LockOpenOutlined,
+  Search,
+} from "@material-ui/icons";
 
 //custom styles
 const useStyles = makeStyles((theme) => ({
@@ -24,8 +29,13 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(3),
   },
   searchInput: {
-    display: "flex",
     width: "40%",
+    position: "absolute",
+    right: "10px",
+  },
+  newButton: {
+    marginRight: theme.spacing(6),
+    textTransform: "none",
   },
 }));
 
@@ -33,12 +43,20 @@ const useStyles = makeStyles((theme) => ({
 
 const headCells = [
   { id: "name", label: "name" },
-  { id: "emal", label: "email" },
+  { id: "email", label: "email" },
+  { id: "phone", label: "phone number" },
+  { id: "action ", label: "Action", disableSort: true },
 ];
 
 export default function users() {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
+  const [notify, setNotify] = useState({
+    isOpen: false,
+    message: "",
+    type: "",
+  });
+  const [openPopup, setOpenPopup] = useState(false);
   const [filterFn, setFilterFn] = useState({
     fn: (items) => {
       return items;
@@ -69,6 +87,23 @@ export default function users() {
     });
   };
 
+  const postData = async (user) => {
+    const data = { ...user };
+    // save the user to db
+    await saveUser(data);
+    //close the pop up
+    setOpenPopup(false);
+    // notify sucess
+    setNotify({
+      isOpen: true,
+      message: "An Email has been sent to the user email with the OTP",
+      type: "success",
+    });
+    // refresh the table
+
+    fetchData();
+  };
+
   // fetching data into table
 
   const fetchData = async () => {
@@ -83,14 +118,13 @@ export default function users() {
   return (
     <div>
       <Paper className={classes.pageContent}>
-        {/* <UserForm /> */}
         <Toolbar>
-          <Grid container xs={12} sm={6}></Grid>
           <Controls.Input
-            label="Search ..."
+            label="Search..."
+            size="small"
             InputProps={{
               startAdornment: (
-                <InputAdornment position="end">
+                <InputAdornment position="start">
                   <Search />
                 </InputAdornment>
               ),
@@ -98,6 +132,14 @@ export default function users() {
             className={classes.searchInput}
             onChange={handleSearch}
           ></Controls.Input>
+          <Controls.Button
+            text="Add user"
+            variant="outlined"
+            size="medium"
+            startIcon={<Add />}
+            className={classes.newButton}
+            onClick={() => setOpenPopup(true)}
+          />
         </Toolbar>
         <TableContainer>
           <TableHeader />
@@ -106,12 +148,35 @@ export default function users() {
               <TableRow key={record._id}>
                 <TableCell>{record.name}</TableCell>
                 <TableCell>{record.email}</TableCell>
+                <TableCell>{record.phone}</TableCell>
+                <TableCell>
+                  <Controls.ActionButton
+                    color="primary"
+                    onClick={() => setOpenPopup(true)}
+                  >
+                    <EditOutlined />
+                  </Controls.ActionButton>
+                  <Controls.ActionButton color="primary">
+                    <LockOpenOutlined />
+                  </Controls.ActionButton>
+                  <Controls.ActionButton color="secondary">
+                    <DeleteOutlined />
+                  </Controls.ActionButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </TableContainer>
         <Pagination />
       </Paper>
+      <Popup
+        title="User Registration form"
+        openPopup={openPopup}
+        setOpenPopup={setOpenPopup}
+      >
+        <UserForm postData={postData} />
+      </Popup>
+      <Notifications notify={notify} setNotify={setNotify} />
     </div>
   );
 }

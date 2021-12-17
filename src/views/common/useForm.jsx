@@ -18,22 +18,8 @@ export function useForm(initialValues, validateOnChange = false, validate) {
     });
     // console.log(values);
 
-    if (validateOnChange)
-      validate({
-        [name]: value,
-      });
+    if (validateOnChange) validate({ [name]: value });
   };
-
-  //converting event to other params i.e name , value
-
-  //handle values submit
-
-  //   const handleSubmit = (e) => {
-  //     e.preventDefault();
-  //     console.log("submitted");
-  //     // doSubmit();
-  //   };
-  // render reusable Input field
 
   return {
     values,

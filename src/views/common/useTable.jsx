@@ -27,6 +27,8 @@ const useStyles = makeStyles((theme) => ({
       cursor: "pointer",
     },
   },
+
+  action: {},
 }));
 
 export function useTable(records, headCells, filterFn) {
@@ -71,16 +73,19 @@ export function useTable(records, headCells, filterFn) {
       <TableHead className={classes.table}>
         <TableRow>
           {headCells.map((headCell) => (
-            <TableCell key={headCell.id}>
-              {/*for enabling sorting*/}
-              <TableSortLabel
-                direction={orderBy === headCell.id ? order : "asc"}
-                onClick={() => {
-                  handleSort(headCell.id);
-                }}
-              >
-                {headCell.label}
-              </TableSortLabel>
+            <TableCell key={headCell.id} className={classes.action}>
+              {headCell.disableSort ? (
+                headCell.label
+              ) : (
+                <TableSortLabel
+                  direction={orderBy === headCell.id ? order : "asc"}
+                  onClick={() => {
+                    handleSort(headCell.id);
+                  }}
+                >
+                  {headCell.label}
+                </TableSortLabel>
+              )}
             </TableCell>
           ))}
         </TableRow>

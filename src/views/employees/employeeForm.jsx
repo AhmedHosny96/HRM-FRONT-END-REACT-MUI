@@ -30,11 +30,13 @@ const initialValues = {
   ],
 };
 
-export default function employeeForm() {
+export default function employeeForm(props) {
+  const { recordForEdit } = props;
+
   // extends the reusable form
 
   const validate = (fieldValues = values) => {
-    let temp = {};
+    let temp = { ...errors };
 
     if ("fullName" in fieldValues)
       temp.fullName = fieldValues.fullName ? "" : "Full name is required";
@@ -65,7 +67,7 @@ export default function employeeForm() {
     validate
   );
 
-  // populateJobs
+  // populate drop downs from db
 
   const populateValues = async () => {
     const { data: jobs } = await getJobs();
@@ -78,14 +80,20 @@ export default function employeeForm() {
   };
 
   useEffect(async () => {
+    if (recordForEdit != null)
+      setValues({
+        ...recordForEdit,
+      });
+
     await populateValues();
-    // await populateBranches();
-  }, []);
+  }, [recordForEdit]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (validate()) window.alert("Clicked");
+    if (validate()) {
+      window.alert("submmited");
+    }
   };
 
   return (
@@ -114,14 +122,7 @@ export default function employeeForm() {
             onChange={handleOnChange}
             error={errors.phoneNumber}
           />
-          <Controls.Select
-            name="gender"
-            label="Gender"
-            value={values.gender}
-            options={initialValues.gendercollection}
-            onChange={handleOnChange}
-            error={errors.gender}
-          />
+
           <Controls.Select
             name="branchId"
             label="Branch"
@@ -155,14 +156,14 @@ export default function employeeForm() {
             onChange={handleOnChange}
             error={errors.salary}
           />
-          <Controls.Select
+          {/* <Controls.Select
             name="employementType"
             label="Employment Type"
             value={values.employementType}
             options={initialValues.employments}
             onChange={handleOnChange}
             error={errors.employementType}
-          />
+          /> */}
         </Grid>
       </Grid>
     </Form>
