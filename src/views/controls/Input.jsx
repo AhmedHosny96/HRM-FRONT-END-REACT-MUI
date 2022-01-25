@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { TextField } from "@material-ui/core";
+import { TextField, TextareaAutosize } from "@material-ui/core";
 // import { TextField } from "@mui/material";
 
 export default function useInput(props) {
@@ -17,6 +17,7 @@ export default function useInput(props) {
       onChange={onChange}
       {...(error && { error: true, helperText: error })}
       {...rest}
+      required
     />
   );
 }

@@ -24,14 +24,17 @@ import {
   Work,
   TimeToLeave,
   SupervisorAccount,
+  LocalHospital,
 } from "@material-ui/icons";
 // core components/views for Admin layout
 import DashboardPage from "views/Dashboard/Dashboard.js";
-import Employees from "views/employees/employees";
-import Branches from "views/branches/branches";
-import Jobs from "views/jobs/jobs";
-import Leaves from "views/leaves/leaves";
+import EmployeeRecords from "views/employees/EmployeeeRecords";
+import Branches from "views/branches/Branches";
+import JobsRecruitments from "views/jobs/JobsRecruitments";
+import LeaveRecords from "views/leaves/LeaveRecords";
 import Users from "views/users/users";
+import MedicalRecords from "./views/medical/MedicalRecords";
+
 const dashboardRoutes = [
   {
     path: "/dashboard",
@@ -45,7 +48,7 @@ const dashboardRoutes = [
     path: "/employees",
     name: "Employees",
     icon: LibraryBooks,
-    component: Employees,
+    component: EmployeeRecords,
     layout: "/admin",
   },
   {
@@ -59,14 +62,21 @@ const dashboardRoutes = [
     path: "/jobs",
     name: "Job Details",
     icon: Work,
-    component: Jobs,
+    component: JobsRecruitments,
     layout: "/admin",
   },
   {
     path: "/leaves",
     name: "Leave Management",
     icon: TimeToLeave,
-    component: Leaves,
+    component: LeaveRecords,
+    layout: "/admin",
+  },
+  {
+    path: "/medical",
+    name: "Medical expense ",
+    icon: LocalHospital,
+    component: MedicalRecords,
     layout: "/admin",
   },
   {

@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+
 import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
-import { Locations } from "../../views/common/dropDownValues.js";
-// import axios from "axios";
-//custom stylings
-// const api = "http://localhost:5000/api/branches/";
+import { patient } from "../../views/common/dropDownValues";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -14,16 +13,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const statuses = ["Open", "Closed"];
+const genders = ["Male", "Female", "Both"];
 
 const initialValues = {
   name: "",
-  region: "",
-  city: "",
-  status: "Open",
+  allowedFor: "",
+  allowedAmount: "",
 };
-
-export default function branchForm(props) {
+export default function MedicalForm(props) {
   const classes = useStyles();
   const { postData, recordForEdit, setNotify } = props;
 
@@ -31,12 +28,12 @@ export default function branchForm(props) {
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
+    if ("code" in fieldValues)
+      temp.code = fieldValues.code ? "" : "Code is required";
     if ("name" in fieldValues)
-      temp.name = fieldValues.name ? "" : "Branch name is required";
-    if ("region" in fieldValues)
-      temp.region = fieldValues.region ? "" : "Location is required";
-    if ("city" in fieldValues)
-      temp.city = fieldValues.city ? "" : "City name is required";
+      temp.name = fieldValues.name ? "" : "Title is required";
+    if ("department" in fieldValues)
+      temp.department = fieldValues.department ? "" : "Department is required";
 
     setErrors({
       ...temp,
@@ -84,36 +81,37 @@ export default function branchForm(props) {
       <Form onSubmit={handleSubmit}>
         <Controls.Input
           name="name"
-          label="Branch name"
-          value={values.name}
+          label="Type"
+          value={values.leaveType}
           onChange={handleOnChange}
           error={errors.name}
         />
-        <Controls.Select
-          name="region"
-          label="Region"
-          value={values.region}
-          options={Locations}
-          onChange={handleOnChange}
-          error={errors.region}
+        <Autocomplete
+          multiple
+          id="employeeId"
+          options={patient}
+          size="small"
+          sx={{ width: 500 }}
+          getOptionLabel={(patient) => patient}
+          renderInput={(params) => (
+            <Controls.Input
+              {...params}
+              label="Allowed for"
+              value={values.employeeId}
+              onChange={handleOnChange}
+            />
+          )}
+          onChange={(event, selectedValue) => {
+            setValues({ employeeId: selectedValue._id });
+          }}
         />
         <Controls.Input
-          name="city"
-          label="city"
-          value={values.city}
+          name="allowedAmount"
+          label="Allowed amount"
+          value={values.leaveType}
           onChange={handleOnChange}
-          error={errors.city}
+          error={errors.name}
         />
-        {recordForEdit && (
-          <Controls.Select
-            name="status"
-            label="Status"
-            value={values.status}
-            options={statuses}
-            onChange={handleOnChange}
-            error={errors.status}
-          />
-        )}
 
         <Controls.Button text="Submit" type="submit" />
       </Form>

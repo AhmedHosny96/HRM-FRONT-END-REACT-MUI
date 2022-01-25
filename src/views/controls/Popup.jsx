@@ -13,10 +13,12 @@ import Close from "@material-ui/icons/Close";
 
 const useStyles = makeStyles((theme) => ({
   dialogWrapper: {
+    marginLeft: theme.spacing(7),
+
     "& .MuiDialog-paper": {
       padding: theme.spacing(2),
       position: "absolute",
-      top: theme.spacing(5),
+      top: theme.spacing(0),
     },
   },
 }));

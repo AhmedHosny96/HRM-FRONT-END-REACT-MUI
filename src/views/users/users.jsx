@@ -42,13 +42,13 @@ const useStyles = makeStyles((theme) => ({
 // column header configurations
 
 const headCells = [
-  { id: "name", label: "name" },
-  { id: "email", label: "email" },
+  { id: "username", label: "username" },
+  { id: "employee", label: "employee" },
   { id: "phone", label: "phone number" },
   { id: "action ", label: "Action", disableSort: true },
 ];
 
-export default function users() {
+export default function Users() {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [notify, setNotify] = useState({
@@ -146,9 +146,9 @@ export default function users() {
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{record.name}</TableCell>
+                <TableCell>{record.employee.fullName}</TableCell>
                 <TableCell>{record.email}</TableCell>
-                <TableCell>{record.phone}</TableCell>
+                <TableCell>{record.isAdmin}</TableCell>
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"

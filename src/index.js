@@ -17,26 +17,31 @@
 */
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
 // core components
-import Admin from "layouts/Admin.js";
-import RTL from "layouts/RTL.js";
-import Login from "./views/pages/login";
 
+import App from "./App";
 import "assets/css/material-dashboard-react.css?v=1.10.0";
-import UserConfirm from "./views/pages/userConfirm";
 
 ReactDOM.render(
-  <BrowserRouter>
-    <Switch>
-      <Route path="/admin" component={Admin} />
-      <Route path="/login" exact component={Login} />
-      <Route path="/login/:id/:token" exact component={UserConfirm} />
-
-      <Route path="/rtl" component={RTL} />
-      <Redirect from="/" to="/admin/dashboard" com />
-    </Switch>
-  </BrowserRouter>,
+  <React.Fragment>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.Fragment>,
   document.getElementById("root")
 );
+
+// ReactDOM.render(
+//   <BrowserRouter>
+//     <Switch>
+//       <Route path="/admin" component={Admin} />
+//       <Route path="/login" exact component={Login} />
+
+//       <Route path="/rtl" component={RTL} />
+//       <Redirect from="/" to="/admin/dashboard" />
+//     </Switch>
+//   </BrowserRouter>,
+//   document.getElementById("root")
+// );

@@ -5,6 +5,10 @@ export function getBranches() {
   return http.get(api);
 }
 
+export function getActiveBranches() {
+  return http.get(api + "open");
+}
+
 export function getBranch(id) {
   return http.get(api + "/" + id);
 }

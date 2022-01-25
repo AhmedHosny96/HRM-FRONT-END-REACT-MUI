@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 
 export default function Select(props) {
-  const { name, label, value, onChange, options, error } = props;
+  const { name, label, value, onChange, options, error, disabled } = props;
   return (
     <FormControl
       size="small"
@@ -17,7 +17,14 @@ export default function Select(props) {
       {...(error && { error: true })}
     >
       <InputLabel>{label}</InputLabel>
-      <MuiSelect name={name} label={label} value={value} onChange={onChange}>
+      <MuiSelect
+        name={name}
+        label={label}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        required
+      >
         <MenuItem value=""></MenuItem>
         {options.map((option) => (
           <MenuItem key={option._id || option.id} value={option._id || option}>

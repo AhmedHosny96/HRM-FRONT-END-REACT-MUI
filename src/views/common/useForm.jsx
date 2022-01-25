@@ -8,18 +8,33 @@ import { makeStyles } from "@material-ui/core";
 export function useForm(initialValues, validateOnChange = false, validate) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
+  // const [branches, setBranches] = useState([]);
 
   //handle input onChange
   const handleOnChange = (e) => {
     const { name, value } = e.target;
+
     setValues({
       ...values,
       [name]: value,
     });
     // console.log(values);
-
     if (validateOnChange) validate({ [name]: value });
   };
+
+  // const handleSelectWithValueChange = (e) => {
+  //   const { name, value } = e.target;
+  //   const selectedBranch = branches.filter((branch) => branch._id == value)[0];
+  //   // console.log(selectedBranch[0]);
+
+  //   setValues({
+  //     ...values,
+  //     ...selectBranch,
+  //     [name]: value,
+  //   });
+  //   // console.log(values);
+  //   if (validateOnChange) validate({ [name]: value });
+  // };
 
   return {
     values,
@@ -27,6 +42,9 @@ export function useForm(initialValues, validateOnChange = false, validate) {
     errors,
     setErrors,
     handleOnChange,
+    // branches,
+    // setBranches,
+    // handleSelectWithValueChange,
   };
 }
 

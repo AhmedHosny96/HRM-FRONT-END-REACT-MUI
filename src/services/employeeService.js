@@ -1,9 +1,15 @@
 import http from "./httpService";
 
-const URL = "http://localhost:5000/api/employees/";
+const URL = "http://localhost:5000/api/employees";
+
+const API = "http://localhost:5000/api/employees/names";
 
 export function getEmployees() {
   return http.get(URL);
+}
+
+export function getEmployeeNames() {
+  return http.get(API);
 }
 
 export function getEmployee(id) {
@@ -20,4 +26,8 @@ export function saveEmployee(employee) {
 
 export function deleteEmployee(id) {
   return http.delete(URL + "/" + id);
+}
+
+export function getEmployeeByBranch(id) {
+  return http.get(URL + "/branch" + "/" + id);
 }

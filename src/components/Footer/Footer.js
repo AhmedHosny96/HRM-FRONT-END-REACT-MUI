@@ -10,7 +10,7 @@ import styles from "assets/jss/material-dashboard-react/components/footerStyle.j
 
 const useStyles = makeStyles(styles);
 
-export default function Footer(props) {
+export default function Footer() {
   const classes = useStyles();
   return (
     <footer className={classes.footer}>

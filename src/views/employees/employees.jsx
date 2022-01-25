@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  InputAdornment,
   Paper,
   Toolbar,
   TableBody,
@@ -11,17 +10,21 @@ import EmployeeForm from "./employeeForm";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
 
-import { getEmployees } from "../../services/employeeService";
-import Controls from "../../views/controls/controls";
-import FormStepper from "../../views/controls/FormStepper";
-// import EmployeeForm from "./employeeForm";
-import { Add, Search, EditOutlined, DeleteOutlined } from "@material-ui/icons/";
-import Popup from "../../views/controls/Popup";
+import {
+  getEmployees,
+  saveEmployee,
+  deleteEmployee,
+} from "../../services/employeeService";
+import Controls from "../controls/controls";
+import { EditOutlined, DeleteOutlined } from "@material-ui/icons/";
+import Popup from "../controls/Popup";
+import Notifications from "../controls/Notifications";
+import ConfirmDialog from "../controls/ConfirmDialog";
 
 const useStyles = makeStyles((theme) => ({
   pageContent: {
-    margin: theme.spacing(5),
-    padding: theme.spacing(3),
+    margin: theme.spacing(2),
+    padding: theme.spacing(1),
   },
   search: {
     width: "40%",
@@ -37,18 +40,37 @@ const useStyles = makeStyles((theme) => ({
 //column header configurations
 
 const headCells = [
-  { id: "fullName", label: "Full Name" },
+  { id: "employeeId", label: "ID" },
+
+  { id: "fullName", label: "Name" },
   { id: "email", label: "Email" },
-  { id: "phoneNumber", label: "Phone Number" },
+  { id: "phoneNumber", label: "Phone" },
   { id: "jobId", label: "Job Title" },
   { id: "branchId", label: "Branch" },
+  { id: "status", label: "Status" },
+
   { id: "action", label: "Action" },
 ];
 
-export default function employees() {
+export default function employees({ user }) {
+  console.log(user);
   const classes = useStyles();
   const [records, setRecords] = useState([]);
+
   const [openPopup, setOpenPopup] = useState(false); // pop dialog
+
+  const [notify, setNotify] = useState({
+    isOpen: false,
+    message: "",
+    type: "",
+  });
+
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    subTitle: "",
+  });
+
   const [recordForEdit, setRecordForEdit] = useState(null); // for populate data into pop up dialog
   const [filterFn, setFilterFn] = useState({
     fn: (items) => {
@@ -62,11 +84,28 @@ export default function employees() {
     Pagination,
   } = useTable(records, headCells, filterFn);
 
+  // posting data to employees form
+
+  const postData = async (employee) => {
+    const data = { ...employee };
+    await saveEmployee(data);
+
+    //close the pop
+    setOpenPopup(false);
+    // send notify alert
+    setNotify({
+      isOpen: true,
+      message: "Successfull !",
+      type: "success",
+    });
+
+    fetchData();
+  };
   //populate data into pop dialog
 
   const openInPopup = (item) => {
-    setOpenPopup(true);
     setRecordForEdit(item);
+    setOpenPopup(true);
   };
 
   //handle search bar on change
@@ -85,6 +124,25 @@ export default function employees() {
     });
   };
 
+  //handling delete
+
+  const handleDelete = async (employee) => {
+    setConfirmDialog({
+      ...confirmDialog,
+      isOpen: false,
+    });
+    records.filter((b) => b._id != employee._id);
+    await deleteEmployee(employee._id);
+
+    setNotify({
+      isOpen: true,
+      message: "Deleted Successfully!",
+      type: "error",
+    });
+    fetchData();
+  };
+
+  // fetching data into table
   const fetchData = async () => {
     const { data } = await getEmployees();
     setRecords(data);
@@ -100,58 +158,98 @@ export default function employees() {
         <Toolbar>
           <Controls.Input
             label="Search..."
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
             className={classes.search}
             onChange={handleSearch}
-          ></Controls.Input>
+          />
 
           <Controls.Button
-            text="Add employee"
+            text="+ Add employee"
             variant="outlined"
             size="medium"
-            startIcon={<Add />}
-            onClick={() => setOpenPopup(true)}
+            onClick={() => {
+              setOpenPopup(true), setRecordForEdit(null);
+            }}
             className={classes.newButton}
-          ></Controls.Button>
+          />
         </Toolbar>
+
         <TableContainer>
           <TableHeader />
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
+                <TableCell>{record.employeeId}</TableCell>
+
                 <TableCell>{record.fullName}</TableCell>
                 <TableCell>{record.email}</TableCell>
                 <TableCell>{record.phoneNumber}</TableCell>
                 <TableCell>{record.job.name}</TableCell>
                 <TableCell>{record.branch.name}</TableCell>
+                <TableCell>{record.status}</TableCell>
+
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
-                    onClick={() => openInPopup(record)}
+                    onClick={() => {
+                      openInPopup(record);
+                    }}
                   >
                     <EditOutlined />
                   </Controls.ActionButton>
-                  <Controls.ActionButton color="secondary">
-                    <DeleteOutlined />
-                  </Controls.ActionButton>
+                  {user && user.isAdmin && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: `Are you sure you want to delete ${record.fullName} ?`,
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                    >
+                      <DeleteOutlined />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </TableContainer>
+
         <Pagination />
       </Paper>
-      <Popup openPopup={openPopup} setOpenPopup={setOpenPopup}>
-        <FormStepper />
 
-        <EmployeeForm recordForEdit={recordForEdit} />
-      </Popup>
+      {recordForEdit && (
+        <Popup
+          title="Update employee"
+          openPopup={openPopup}
+          setOpenPopup={setOpenPopup}
+        >
+          <EmployeeForm
+            recordForEdit={recordForEdit}
+            postData={postData}
+            setNotify={setNotify}
+          />
+        </Popup>
+      )}
+      {!recordForEdit && (
+        <Popup
+          title="Add new employee"
+          openPopup={openPopup}
+          setOpenPopup={setOpenPopup}
+        >
+          <EmployeeForm
+            recordForEdit={recordForEdit}
+            postData={postData}
+            setNotify={setNotify}
+          />
+        </Popup>
+      )}
+      <Notifications notify={notify} setNotify={setNotify} />
+      <ConfirmDialog
+        confirmDialog={confirmDialog}
+        setConfirmDialog={setConfirmDialog}
+      />
     </div>
   );
 }

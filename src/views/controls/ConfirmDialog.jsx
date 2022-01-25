@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
   confirmDialog: {
     position: "absolute",
     top: theme.spacing(10),
+    opacity: "0.95",
   },
   dialogContent: {
     textAlign: "center",
@@ -38,8 +39,9 @@ export default function ConfirmDialog(props) {
       </DialogContent>
       <DialogActions className={classes.dialogAction}>
         <Controls.Button
+          style={{ backgroundColor: "#B9B7B9" }}
           text="No"
-          color="default"
+          // color="default"
           size="small"
           onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
         />

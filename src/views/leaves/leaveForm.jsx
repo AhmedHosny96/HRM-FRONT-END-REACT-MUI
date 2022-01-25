@@ -1,9 +1,110 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { makeStyles } from "@material-ui/core/styles";
 
-export default function leaveForm() {
+import { useForm, Form } from "../common/useForm";
+import Controls from "../../views/controls/controls";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: "100%",
+    marginLeft: theme.spacing(3),
+  },
+}));
+
+const genders = ["Male", "Female", "Both"];
+
+const initialValues = {
+  leaveType: "",
+  numberOfDays: "",
+  leaveGroup: "",
+};
+export default function LeaveForm(props) {
+  const classes = useStyles();
+  const { postData, recordForEdit, setNotify } = props;
+
+  //validation
+
+  const validate = (fieldValues = values) => {
+    let temp = { ...errors };
+    if ("code" in fieldValues)
+      temp.code = fieldValues.code ? "" : "Code is required";
+    if ("name" in fieldValues)
+      temp.name = fieldValues.name ? "" : "Title is required";
+    if ("department" in fieldValues)
+      temp.department = fieldValues.department ? "" : "Department is required";
+
+    setErrors({
+      ...temp,
+    });
+
+    if (fieldValues == values) return Object.values(temp).every((x) => x == "");
+  };
+  const { values, setValues, errors, setErrors, handleOnChange } = useForm(
+    initialValues,
+    true,
+    validate
+  );
+
+  //populating data into form
+
+  useEffect(() => {
+    //populate if there are records
+
+    if (recordForEdit != null)
+      setValues({
+        ...recordForEdit,
+      });
+  }, [recordForEdit]);
+
+  //saving data to db
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (validate()) {
+      try {
+        await postData(values);
+      } catch (ex) {
+        setNotify({
+          isOpen: true,
+          message: ex.response.data,
+          type: "warning",
+        });
+      }
+    }
+  };
+
+  const top100Films = ["Money hiest", "italian job"];
   return (
-    <div>
-      <h1>Hello world </h1>
+    <div className={classes.root}>
+      <Form onSubmit={handleSubmit}>
+        <Controls.Input
+          name="leaveType"
+          label="Leave type"
+          value={values.leaveType}
+          onChange={handleOnChange}
+          error={errors.name}
+        />
+        <Controls.Input
+          name="numberOfDays"
+          label="Allowed days"
+          value={values.numberOfDays}
+          onChange={handleOnChange}
+          error={errors.name}
+          type="number"
+        />
+        <Controls.Select
+          name="leaveGroup"
+          label="Allowed for"
+          value={values.leaveGroup}
+          options={genders}
+          onChange={handleOnChange}
+          error={errors.department}
+        />
+
+        <Controls.Button text="Submit" type="submit" />
+      </Form>
     </div>
   );
 }

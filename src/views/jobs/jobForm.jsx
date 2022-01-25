@@ -1,9 +1,105 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import { useForm, Form } from "../common/useForm";
+import Controls from "../../views/controls/controls";
 
-export default function jobForm() {
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: "100%",
+    marginLeft: theme.spacing(3),
+  },
+}));
+
+const departments = ["Rays", "Sahay", "Both"];
+
+const initialValues = {
+  code: "",
+  name: "",
+  department: "",
+};
+export default function jobForm(props) {
+  const classes = useStyles();
+  const { postData, recordForEdit, setNotify } = props;
+
+  //validation
+
+  const validate = (fieldValues = values) => {
+    let temp = { ...errors };
+    if ("code" in fieldValues)
+      temp.code = fieldValues.code ? "" : "Code is required";
+    if ("name" in fieldValues)
+      temp.name = fieldValues.name ? "" : "Title is required";
+    if ("department" in fieldValues)
+      temp.department = fieldValues.department ? "" : "Department is required";
+
+    setErrors({
+      ...temp,
+    });
+
+    if (fieldValues == values) return Object.values(temp).every((x) => x == "");
+  };
+  const { values, setValues, errors, setErrors, handleOnChange } = useForm(
+    initialValues,
+    true,
+    validate
+  );
+
+  //populating data into form
+
+  useEffect(() => {
+    //populate if there are records
+
+    if (recordForEdit != null)
+      setValues({
+        ...recordForEdit,
+      });
+  }, [recordForEdit]);
+
+  //saving data to db
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (validate()) {
+      try {
+        await postData(values);
+      } catch (ex) {
+        setNotify({
+          isOpen: true,
+          message: ex.response.data,
+          type: "warning",
+        });
+      }
+    }
+  };
   return (
-    <div>
-      <h1> Hello world</h1>
+    <div className={classes.root}>
+      <Form onSubmit={handleSubmit}>
+        <Controls.Input
+          name="code"
+          label="Job code"
+          value={values.code}
+          onChange={handleOnChange}
+          error={errors.name}
+        />
+        <Controls.Input
+          name="name"
+          label="Job title"
+          value={values.name}
+          onChange={handleOnChange}
+          error={errors.name}
+        />
+        <Controls.Select
+          name="department"
+          label="Department"
+          value={values.department}
+          options={departments}
+          onChange={handleOnChange}
+          error={errors.department}
+        />
+
+        <Controls.Button text="Submit" type="submit" />
+      </Form>
     </div>
   );
 }

@@ -12,37 +12,42 @@ import routes from "routes.js";
 
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
-import bgImage from "assets/img/sidebar-2.jpg";
+import bgImage from "assets/img/backgroundcolor.jpg";
 import logo from "assets/img/reactlogo.png";
-
-const switchRoutes = (
-  <Switch>
-    {routes.map((prop, key) => {
-      if (prop.layout === "/admin") {
-        return (
-          <Route
-            path={prop.layout + prop.path}
-            component={prop.component}
-            key={key}
-          />
-        );
-      }
-      return null;
-    })}
-    <Redirect from="/admin" to="/admin/dashboard" />
-  </Switch>
-);
 
 const useStyles = makeStyles(styles);
 
-export default function Admin({ ...rest }) {
+export default function Admin({ user }, { ...rest }) {
   // styles
   const classes = useStyles();
+  // console.log(user);
+  const switchRoutes = (
+    <Switch>
+      {routes.map((prop, key) => {
+        if (prop.layout === "/admin") {
+          return (
+            <Route
+              path={prop.layout + prop.path}
+              render={() => <prop.component user={user} />}
+              key={key}
+
+              // user={user}
+            />
+          );
+        }
+        return null;
+      })}
+      <Redirect from="/admin" to="/admin/dashboard" />
+    </Switch>
+  );
+
   // ref to help us initialize PerfectScrollbar on windows devices
+
   const mainPanel = React.createRef();
+
   // states and functions
   const [image, setImage] = React.useState(bgImage);
-  const [color, setColor] = React.useState("blue");
+  const [color, setColor] = React.useState("purple");
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleImageClick = (image) => {
@@ -85,7 +90,7 @@ export default function Admin({ ...rest }) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
-        logoText={"Creative Tim"}
+        logoText={"Rays MFI"}
         logo={logo}
         image={image}
         handleDrawerToggle={handleDrawerToggle}
@@ -97,6 +102,7 @@ export default function Admin({ ...rest }) {
         <Navbar
           routes={routes}
           handleDrawerToggle={handleDrawerToggle}
+          user={user}
           {...rest}
         />
         {/* On the /maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}

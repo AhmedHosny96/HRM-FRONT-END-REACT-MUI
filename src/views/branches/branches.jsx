@@ -5,15 +5,14 @@ import {
   TableRow,
   TableCell,
   Toolbar,
-  InputAdornment,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
 import BranchForm from "./branchForm";
-import Controls from "../../views/controls/controls";
+import Controls from "../controls/controls";
 import { Search, Add, DeleteOutline } from "@material-ui/icons/";
-import Popup from "../../views/controls/Popup";
-import ConfirmDialog from "../../views/controls/ConfirmDialog";
+import Popup from "../controls/Popup";
+import ConfirmDialog from "../controls/ConfirmDialog";
 import {
   saveBranch,
   getBranches,
@@ -24,17 +23,20 @@ import Notifications from "views/controls/Notifications";
 import { EditOutlined } from "@material-ui/icons/";
 const useStyles = makeStyles((theme) => ({
   pageContent: {
-    margin: theme.spacing(5),
-    padding: theme.spacing(3),
+    margin: theme.spacing(1),
+    padding: theme.spacing(1),
   },
   searchInput: {
-    width: "40%",
+    width: "42%",
     position: "absolute",
     right: "10px",
   },
   newButton: {
     marginRight: theme.spacing(6),
     textTransform: "none",
+
+    // backgroundColor: "purple",
+    // color: "white",
   },
 }));
 
@@ -49,7 +51,7 @@ const headCells = [
   { id: "action", label: "Action", disableSort: true },
 ];
 
-export default function branches() {
+export default function Branches({ user }) {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   0;
@@ -80,11 +82,10 @@ export default function branches() {
   } = useTable(records, headCells, filterFn);
 
   // posting and update data into db for branchesform
-  const postData = async (employee) => {
-    const data = { ...employee };
+  const postData = async (branch) => {
+    const data = { ...branch };
     await saveBranch(data);
 
-    
     //close the pop
     setOpenPopup(false);
     // send notify alert
@@ -157,23 +158,17 @@ export default function branches() {
       <Paper className={classes.pageContent}>
         <Toolbar>
           <Controls.Input
-            label="Search..."
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
+            label="search..."
+            variant="outlined"
             className={classes.searchInput}
             onChange={handleSearch}
           />
           <Controls.Button
-            text="Add Branch"
+            text="+ Add Branch"
             variant="outlined"
             size="medium"
             className={classes.newButton}
-            startIcon={<Add />}
+            // startIcon={<Add />}
             onClick={() => {
               setOpenPopup(true);
               setRecordForEdit(null);
@@ -193,7 +188,9 @@ export default function branches() {
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
-                    onClick={() => openInPopup(record)}
+                    onClick={() => {
+                      openInPopup(record), console.log(record);
+                    }}
                   >
                     <EditOutlined />
                   </Controls.ActionButton>
@@ -218,7 +215,7 @@ export default function branches() {
         <Pagination />
       </Paper>
       <Popup
-        title="Branch Form"
+        title="Add new branch"
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >

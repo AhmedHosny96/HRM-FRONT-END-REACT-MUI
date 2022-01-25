@@ -1,8 +1,12 @@
-import { Grid } from "@material-ui/core";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Form } from "../common/useForm";
+import {
+  Gender,
+  employeeStatus,
+  employmentType,
+} from "../../views/common/dropDownValues.js";
 
-import { getBranches } from "../../services/branchService";
+import { getActiveBranches } from "../../services/branchService";
 import { getJobs } from "../../services/jobService";
 import Controls from "../../views/controls/controls";
 
@@ -15,28 +19,26 @@ const initialValues = {
   branchId: "",
   jobId: "",
   salary: "",
-  employementType: "",
+  employmentStatus: "",
   startDate: new Date(),
   status: "Active",
-  image: "",
-
-  branches: [],
-  jobs: [],
-  gendercollection: ["male", "female"],
-  employments: [
-    "Full Time permanent",
-    "Full Time Contract ",
-    "Part Time Contract",
-  ],
+  branch: [],
+  job: [],
 };
 
 export default function employeeForm(props) {
-  const { recordForEdit } = props;
+  const { recordForEdit, postData, setNotify } = props;
+
+  const [branches, setBranches] = useState([]);
+  const [jobs, setJobs] = useState([]);
 
   // extends the reusable form
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
+
+    if ("employeeId" in fieldValues)
+      temp.employeeId = fieldValues.employeeId ? "" : "ID no is required";
 
     if ("fullName" in fieldValues)
       temp.fullName = fieldValues.fullName ? "" : "Full name is required";
@@ -70,102 +72,147 @@ export default function employeeForm(props) {
   // populate drop downs from db
 
   const populateValues = async () => {
+    const { data: branch } = await getActiveBranches();
     const { data: jobs } = await getJobs();
-    const { data: branches } = await getBranches();
 
-    setValues({
-      jobs,
-      branches,
-    });
+    setBranches(branch);
+    setJobs(jobs);
   };
 
-  useEffect(async () => {
-    if (recordForEdit != null)
+  useEffect(() => {
+    // populate select from backend
+    // await populateValues();
+
+    populateValues();
+    if (recordForEdit != null) {
       setValues({
         ...recordForEdit,
+        branchId: recordForEdit.branch._id,
+        jobId: recordForEdit.job._id,
       });
-
-    await populateValues();
+    }
   }, [recordForEdit]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (validate()) {
-      window.alert("submmited");
+      try {
+        await postData(values);
+        console.log(values);
+      } catch (error) {
+        setNotify({
+          isOpen: true,
+          message: error.response.data,
+          type: "warning",
+        });
+      }
     }
   };
 
   return (
     <Form onSubmit={handleSubmit}>
-      <Grid container>
-        <Grid item xs={6}>
-          <Controls.Input
-            name="fullName"
-            label="Full Name"
-            value={values.fullName}
-            onChange={handleOnChange}
-            error={errors.fullName}
-          />
-          <Controls.Input
-            name="email"
-            label="Email"
-            value={values.email}
-            onChange={handleOnChange}
-            error={errors.email}
-          />
-          <Controls.Input
-            name="phoneNumber"
-            label="Phone"
-            type="number"
-            value={values.phoneNumber}
-            onChange={handleOnChange}
-            error={errors.phoneNumber}
-          />
+      <Controls.Input
+        name="employeeId"
+        label="Employee Id"
+        value={values.employeeId}
+        onChange={handleOnChange}
+        error={errors.fullName}
+        required
+      />
+      <Controls.Input
+        name="fullName"
+        label="Full Name"
+        value={values.fullName}
+        onChange={handleOnChange}
+        error={errors.fullName}
+        required
+      />
+      <Controls.Input
+        name="email"
+        label="Email"
+        value={values.email}
+        onChange={handleOnChange}
+        error={errors.email}
+        required
+      />
+      <Controls.Input
+        name="phoneNumber"
+        label="Phone"
+        type="number"
+        value={values.phoneNumber}
+        onChange={handleOnChange}
+        error={errors.phoneNumber}
+        required
+      />
+      <Controls.Select
+        name="gender"
+        label="Gender"
+        value={values.gender}
+        options={Gender}
+        onChange={handleOnChange}
+        error={errors.gender}
+        required
+      />
 
-          <Controls.Select
-            name="branchId"
-            label="Branch"
-            value={values.branchId}
-            options={values.branches}
-            onChange={handleOnChange}
-            error={errors.branchId}
-          />
-          <Controls.Select
-            name="jobId"
-            label="Job Title"
-            value={values.jobId}
-            options={values.jobs}
-            onChange={handleOnChange}
-            error={errors.jobId}
-          />
-          <Controls.Button text="Submit " type="submit" />
-        </Grid>
-        <Grid item xs={6}>
-          <Controls.Date
-            name="startDate"
-            label="Start date"
-            value={values.startDate}
-            onChange={handleOnChange}
-          />
-          <Controls.Input
-            name="salary"
-            label="Salary"
-            type="number"
-            value={values.salary}
-            onChange={handleOnChange}
-            error={errors.salary}
-          />
-          {/* <Controls.Select
-            name="employementType"
-            label="Employment Type"
-            value={values.employementType}
-            options={initialValues.employments}
-            onChange={handleOnChange}
-            error={errors.employementType}
-          /> */}
-        </Grid>
-      </Grid>
+      <Controls.Select
+        name="branchId"
+        label="Branch"
+        value={values.branchId}
+        options={branches}
+        onChange={handleOnChange}
+        error={errors.branchId}
+        required
+      />
+
+      <Controls.Select
+        name="jobId"
+        label="Job Title"
+        value={values.jobId}
+        options={jobs}
+        onChange={handleOnChange}
+        error={errors.jobId}
+        required
+      />
+      <Controls.Date
+        name="startDate"
+        label="Start date"
+        value={values.startDate}
+        onChange={handleOnChange}
+        required
+      />
+      <Controls.Input
+        name="salary"
+        label="Salary"
+        type="number"
+        value={values.salary}
+        onChange={handleOnChange}
+        error={errors.salary}
+        required
+      />
+      <Controls.Select
+        name="employmentStatus"
+        label="Employment Type"
+        value={values.employmentStatus}
+        options={employmentType}
+        onChange={handleOnChange}
+        error={errors.employmentStatus}
+        required
+      />
+      {recordForEdit && (
+        <Controls.Select
+          name="status"
+          label="Status"
+          value={values.status}
+          options={employeeStatus}
+          onChange={handleOnChange}
+          error={errors.status}
+          required
+        />
+      )}
+
+      {recordForEdit && <Controls.Button text="Update " type="submit" />}
+      {!recordForEdit && <Controls.Button text="Submit" type="submit" />}
     </Form>
   );
 }

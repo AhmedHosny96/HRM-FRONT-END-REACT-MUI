@@ -6,24 +6,28 @@ import {
   TableCell,
   Toolbar,
 } from "@material-ui/core";
-import LeaveForm from "./LeaveForm.jsx";
 import { makeStyles } from "@material-ui/core/styles";
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons";
-import Controls from "../controls/controls";
-import Popup from "../controls/Popup";
 import { useTable } from "../common/useTable";
-import {
-  getLeaves,
-  deleteLeave,
-  saveLeave,
-} from "./../../services/leaveService";
 
+import Controls from "../controls/controls";
+import {
+  EditOutlined,
+  DeleteOutline,
+  RemoveRedEyeOutlined,
+} from "@material-ui/icons/";
+import Popup from "../controls/Popup";
 import ConfirmDialog from "../controls/ConfirmDialog";
+import {
+  getRecruitments,
+  saveRecruitment,
+  deleteRecruitment,
+} from "../../services/recruitmentService";
 import Notifications from "views/controls/Notifications";
+import RecruitmentForm from "./RecruitmentForm";
 
 const useStyles = makeStyles((theme) => ({
-  pagecontent: {
-    margin: theme.spacing(2),
+  pageContent: {
+    margin: theme.spacing(0),
     padding: theme.spacing(1),
   },
   searchInput: {
@@ -39,17 +43,26 @@ const useStyles = makeStyles((theme) => ({
     // color: "white",
   },
 }));
+
+//table header column configurations
+
 const headCells = [
-  { id: "leaveType", label: "Leave type" },
-  { id: "numberOfDays", label: "Days allowed" },
-  { id: "leaveGroup", label: "Allowed for" },
+  { id: "jobId", label: "Position" },
+  { id: "branchId", label: "Branch" },
+  { id: "requiredNumber", label: "Required no" },
+  { id: "employementType", label: "Employment Type" },
+  { id: "status", label: "Status" },
+
   { id: "action", label: "Action", disableSort: true },
 ];
-export default function leaves() {
+export default function Recruitments() {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
-  0;
-  const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
+  const [openPopup, setOpenPopup] = useState(false);
+  const [openPopupEdit, setOpenPopupEdit] = useState(false); // state variables for dialog pop up\
+  const [openPopupView, setOpenPopupView] = useState(false); // state variables for dialog pop up\
+
+  const [inputDisabled, setInputDisabled] = useState(false);
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
     isOpen: false,
@@ -75,6 +88,26 @@ export default function leaves() {
     recordsAfterPagingAndSorting,
   } = useTable(records, headCells, filterFn);
 
+  // posting and update data into db for branchesform
+  const postData = async (recruitment) => {
+    const data = { ...recruitment };
+    await saveRecruitment(data);
+
+    //close the pop
+    setOpenPopup(false);
+
+    // send notify alert
+    setNotify({
+      isOpen: true,
+      message: "Successfull !",
+      type: "success",
+    });
+
+    fetchData();
+  };
+
+  //handling search
+
   const handleSearch = (e) => {
     let target = e.target;
     //
@@ -86,29 +119,21 @@ export default function leaves() {
         //do the filter
         else
           return items.filter((item) =>
-            item.name.toLowerCase().includes(target.value)
+            item.job.name.toLowerCase().includes(target.value)
           );
       },
     });
   };
 
-  const openInPopup = (item) => {
-    //set the fields to be populated
-    setRecordForEdit(item);
-    //open in dailog popup
-    setOpenPopup(true);
-    //stop populating
-  };
-
   //handle delete
 
-  const handleDelete = async (leave) => {
+  const handleDelete = async (recruitment) => {
     setConfirmDialog({
       ...confirmDialog,
       isOpen: false,
     });
-    records.filter((b) => b._id != leave._id);
-    await deleteLeave(leave._id);
+    records.filter((b) => b._id != recruitment._id);
+    await deleteRecruitment(recruitment._id);
 
     setNotify({
       isOpen: true,
@@ -118,33 +143,37 @@ export default function leaves() {
     fetchData();
   };
 
-  // posting and update data into db for branchesform
-  const postData = async (job) => {
-    const data = { ...job };
-    await saveLeave(data);
+  // populate the data into form
 
-    //close the pop
-    setOpenPopup(false);
-    // send notify alert
-    setNotify({
-      isOpen: true,
-      message: "Successfull !",
-      type: "success",
-    });
-
-    fetchData();
+  const openInPopupEdit = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //stop populating
+    setInputDisabled(false);
   };
-  // fetching records from DB
+
+  const openInPopupView = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //stop populating
+    setInputDisabled(true);
+  };
+
   const fetchData = async () => {
-    const { data } = await getLeaves();
+    const { data } = await getRecruitments();
     setRecords(data);
   };
   useEffect(() => {
     fetchData();
   }, []);
+
   return (
     <div>
-      <Paper className={classes.pagecontent}>
+      <Paper className={classes.pageContent}>
         <Toolbar>
           <Controls.Input
             label="search..."
@@ -153,7 +182,7 @@ export default function leaves() {
             onChange={handleSearch}
           />
           <Controls.Button
-            text="+ Leave record"
+            text="+ Recruitment request"
             variant="outlined"
             size="medium"
             className={classes.newButton}
@@ -164,19 +193,32 @@ export default function leaves() {
             }}
           />
         </Toolbar>
+
         <TableContainer>
           <TableHeader />
+
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{record.leaveType}</TableCell>
-                <TableCell>{record.numberOfDays}</TableCell>
-                <TableCell>{record.leaveGroup}</TableCell>
+                <TableCell>{record.job.name}</TableCell>
+                <TableCell>{record.branch.name}</TableCell>
+                <TableCell>{record.requiredNumber}</TableCell>
+                <TableCell>{record.employementType}</TableCell>
+                <TableCell style={{}}>{record.status}</TableCell>
+
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInPopupView(record);
+                    }}
+                  >
+                    <RemoveRedEyeOutlined />
+                  </Controls.ActionButton>
+                  <Controls.ActionButton
+                    color="primary"
+                    onClick={() => {
+                      openInPopupEdit(record);
                     }}
                   >
                     <EditOutlined />
@@ -192,7 +234,7 @@ export default function leaves() {
                       })
                     }
                   >
-                    <DeleteOutlined />
+                    <DeleteOutline />
                   </Controls.ActionButton>
                 </TableCell>
               </TableRow>
@@ -202,16 +244,18 @@ export default function leaves() {
         <Pagination />
       </Paper>
       <Popup
-        title="leave request "
+        title="Recruitment request form"
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >
-        <LeaveForm
+        <RecruitmentForm
+          postData={postData}
           recordForEdit={recordForEdit}
           setNotify={setNotify}
-          postData={postData}
+          inputDisabled={inputDisabled}
         />
       </Popup>
+
       <Notifications notify={notify} setNotify={setNotify} />
       <ConfirmDialog
         confirmDialog={confirmDialog}

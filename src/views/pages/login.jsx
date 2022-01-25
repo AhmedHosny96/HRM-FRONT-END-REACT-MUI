@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Grid, InputAdornment } from "@material-ui/core";
+import {
+  Grid,
+  InputAdornment,
+  Avatar,
+  Typography,
+  Button,
+  Link,
+} from "@material-ui/core";
+import { LockOutlined } from "@material-ui/icons";
+
 import { makeStyles } from "@material-ui/core/styles";
-import brand from "../../../src/ha.jpg";
-import logo from "../../../src/rays.png";
+import brand from "../../../src/www.jpg";
+import logo from "../../../src/www.jpg";
 
 import { Lock, Email } from "@material-ui/icons";
 import Controls from "../controls/controls";
 import { useForm, Form } from "../common/useForm";
 import { loginUser } from "../../services/authService";
-// import { getUser } from "../../services/userService";
-import Popup from "../controls/Popup";
-// import { useParams } from "react-router-dom";
-import UserConfirm from "./userConfirm";
+import Notifications from "../../views/controls/Notifications";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -34,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
   inputContainer: {
     display: "flex",
     flexDirection: "column",
+    marginTop: "-50px",
     maxWidth: 400,
     minWidth: 350,
   },
@@ -52,11 +59,6 @@ const initialValues = {
 };
 
 export default function login(props) {
-  const [openPopup, setOpenPopup] = useState(false);
-  const [popUpClose, setpopUpClose] = useState(false);
-  // const [, setDisabled] = useState(false);
-  //field validations
-
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
 
@@ -75,40 +77,28 @@ export default function login(props) {
     true,
     validate
   );
+  const [notify, setNotify] = useState({
+    isOpen: false,
+    message: "",
+    type: "",
+  });
   //check if user signed Up
-
-  const userID = props.match.params.id;
-  useEffect(() => {
-    // setDisabled();
-
-    if (userID) {
-      setOpenPopup(true);
-      setpopUpClose(true);
-    }
-    // if params.id
-  }, []);
-  // const { id } = useParams();
-  // console.log("param id : ", id);
-  //login request to server
-
-  const login = async () => {
-    const data = { ...values };
-    await loginUser(data.email, data.password);
-  };
 
   // handling submit
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validate()) {
-      try {
-        await login();
-        //   window.alert("Logged in");
-        props.history.push("/dashboard");
-      } catch (ex) {
-        // window.alert(ex.response.data);
-      }
+    try {
+      const { email, password } = { ...values };
+      await loginUser(email, password);
+      window.location = "/admin/dashboard";
+    } catch (ex) {
+      setNotify({
+        isOpen: true,
+        message: ex.response.data,
+        type: "error",
+      });
     }
   };
   //useStyles
@@ -131,9 +121,18 @@ export default function login(props) {
           <div />
           <div className={classes.inputContainer}>
             <Grid container justify="center">
-              <img src={logo} width={200} style={{ borderRadius: "100px" }} />
+              <Avatar sx={{ m: 1, bgcolor: "purple" }}>
+                <LockOutlined />
+              </Avatar>
             </Grid>
-            <Form onSubmit={handleSubmit}>
+            <Typography
+              component="h1"
+              variant="h5"
+              style={{ textAlign: "center", marginTop: "5px" }}
+            >
+              Sign in
+            </Typography>
+            <Form onSubmit={handleSubmit} history={props.history}>
               <Controls.Input
                 autoFocus
                 name="email"
@@ -172,31 +171,25 @@ export default function login(props) {
                 type="submit"
                 disabled={(validate && !values.email) || !values.password}
               />
-              {/* <Controls.Button
-              text="test confirmation"
-              color="outlined"
-              onClick={() => setOpenPopup(true)}
-            /> */}
 
-              <div />
-              {/* <Button color="default" variant="contained">
-            Rays Microfinance Instituition
-          </Button> */}
+              <div style={{ height: 20, marginLeft: "5px" }}>
+                {/* <Button color="default" variant="contained">
+                  Rays Microfinance Instituition
+                </Button> */}
+              </div>
+
+              <Notifications notify={notify} setNotify={setNotify} />
             </Form>
           </div>
           <div />
+          {/* <Grid item spacing={2}>
+            <Button>Forgot password ?</Button>
+          </Grid>
+          <Grid item>
+            <Button>Rays microfinance institution</Button>
+          </Grid> */}
         </Grid>
       </Grid>
-
-      <Popup
-        title="User Confirmation"
-        openPopup={openPopup}
-        popUpClose={popUpClose}
-        setpopUpClose={setpopUpClose}
-        setOpenPopup={setOpenPopup}
-      >
-        <UserConfirm></UserConfirm>
-      </Popup>
     </div>
   );
 }

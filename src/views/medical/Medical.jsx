@@ -6,17 +6,17 @@ import {
   TableCell,
   Toolbar,
 } from "@material-ui/core";
-import LeaveForm from "./LeaveForm.jsx";
+import MedicalForm from "./MedicalForm.jsx";
 import { makeStyles } from "@material-ui/core/styles";
 import { EditOutlined, DeleteOutlined } from "@material-ui/icons";
 import Controls from "../controls/controls";
 import Popup from "../controls/Popup";
 import { useTable } from "../common/useTable";
 import {
-  getLeaves,
-  deleteLeave,
-  saveLeave,
-} from "./../../services/leaveService";
+  getMedicals,
+  deleteMedical,
+  saveMedical,
+} from "./../../services/medicalService";
 
 import ConfirmDialog from "../controls/ConfirmDialog";
 import Notifications from "views/controls/Notifications";
@@ -40,12 +40,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const headCells = [
-  { id: "leaveType", label: "Leave type" },
-  { id: "numberOfDays", label: "Days allowed" },
-  { id: "leaveGroup", label: "Allowed for" },
+  { id: "name", label: "Name" },
+  { id: "numberOfDays", label: "Allowed for" },
+  { id: "leaveGroup", label: "Allowed amount " },
   { id: "action", label: "Action", disableSort: true },
 ];
-export default function leaves() {
+
+const Medical = () => {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   0;
@@ -108,7 +109,7 @@ export default function leaves() {
       isOpen: false,
     });
     records.filter((b) => b._id != leave._id);
-    await deleteLeave(leave._id);
+    await deleteMedical(leave._id);
 
     setNotify({
       isOpen: true,
@@ -121,7 +122,7 @@ export default function leaves() {
   // posting and update data into db for branchesform
   const postData = async (job) => {
     const data = { ...job };
-    await saveLeave(data);
+    await saveMedical(data);
 
     //close the pop
     setOpenPopup(false);
@@ -136,12 +137,13 @@ export default function leaves() {
   };
   // fetching records from DB
   const fetchData = async () => {
-    const { data } = await getLeaves();
+    const { data } = await getMedicals();
     setRecords(data);
   };
   useEffect(() => {
     fetchData();
   }, []);
+
   return (
     <div>
       <Paper className={classes.pagecontent}>
@@ -153,7 +155,7 @@ export default function leaves() {
             onChange={handleSearch}
           />
           <Controls.Button
-            text="+ Leave record"
+            text="+ Medical benefit"
             variant="outlined"
             size="medium"
             className={classes.newButton}
@@ -169,9 +171,15 @@ export default function leaves() {
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{record.leaveType}</TableCell>
-                <TableCell>{record.numberOfDays}</TableCell>
-                <TableCell>{record.leaveGroup}</TableCell>
+                <TableCell>{record.name}</TableCell>
+                <TableCell>
+                  {record.allowedFor[1] +
+                    " ," +
+                    record.allowedFor[0] +
+                    " , " +
+                    record.allowedFor[2]}
+                </TableCell>
+                <TableCell>{record.allowedAmount}</TableCell>
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
@@ -206,7 +214,7 @@ export default function leaves() {
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >
-        <LeaveForm
+        <MedicalForm
           recordForEdit={recordForEdit}
           setNotify={setNotify}
           postData={postData}
@@ -219,4 +227,6 @@ export default function leaves() {
       />
     </div>
   );
-}
+};
+
+export default Medical;

@@ -6,24 +6,25 @@ import {
   TableCell,
   Toolbar,
 } from "@material-ui/core";
-import LeaveForm from "./LeaveForm.jsx";
 import { makeStyles } from "@material-ui/core/styles";
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons";
-import Controls from "../controls/controls";
-import Popup from "../controls/Popup";
 import { useTable } from "../common/useTable";
-import {
-  getLeaves,
-  deleteLeave,
-  saveLeave,
-} from "./../../services/leaveService";
 
+import EmployeeDocumentForm from "./EmployeeDocumentForm";
+
+import Controls from "../controls/controls";
+import { EditOutlined, DeleteOutline } from "@material-ui/icons/";
+import Popup from "../controls/Popup";
 import ConfirmDialog from "../controls/ConfirmDialog";
+import {
+  saveDocument,
+  getDocuments,
+  deleteDocument,
+} from "../../services/documentService";
 import Notifications from "views/controls/Notifications";
 
 const useStyles = makeStyles((theme) => ({
-  pagecontent: {
-    margin: theme.spacing(2),
+  pageContent: {
+    margin: theme.spacing(0),
     padding: theme.spacing(1),
   },
   searchInput: {
@@ -39,16 +40,22 @@ const useStyles = makeStyles((theme) => ({
     // color: "white",
   },
 }));
+
+//table header column configurations
+
 const headCells = [
-  { id: "leaveType", label: "Leave type" },
-  { id: "numberOfDays", label: "Days allowed" },
-  { id: "leaveGroup", label: "Allowed for" },
+  { id: "employeeId", label: "Employee" },
+  { id: "branchId", label: "Branch" },
+  { id: "documentType", label: "Document type" },
+  { id: "details", label: "Details" },
+
   { id: "action", label: "Action", disableSort: true },
 ];
-export default function leaves() {
+
+export default function EmployeeDocuments() {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
-  0;
+
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -75,6 +82,23 @@ export default function leaves() {
     recordsAfterPagingAndSorting,
   } = useTable(records, headCells, filterFn);
 
+  // posting and update data into db for branchesform
+  const postData = async (document) => {
+    const data = { ...document };
+    await saveDocument(data);
+    setOpenPopup(false);
+
+    setNotify({
+      isOpen: true,
+      message: "Successfull !",
+      type: "success",
+    });
+
+    fetchData();
+  };
+
+  //handling search
+
   const handleSearch = (e) => {
     let target = e.target;
     //
@@ -92,23 +116,15 @@ export default function leaves() {
     });
   };
 
-  const openInPopup = (item) => {
-    //set the fields to be populated
-    setRecordForEdit(item);
-    //open in dailog popup
-    setOpenPopup(true);
-    //stop populating
-  };
-
   //handle delete
 
-  const handleDelete = async (leave) => {
+  const handleDelete = async (document) => {
     setConfirmDialog({
       ...confirmDialog,
       isOpen: false,
     });
-    records.filter((b) => b._id != leave._id);
-    await deleteLeave(leave._id);
+    records.filter((b) => b._id != document._id);
+    await deleteDocument(document._id);
 
     setNotify({
       isOpen: true,
@@ -118,33 +134,27 @@ export default function leaves() {
     fetchData();
   };
 
-  // posting and update data into db for branchesform
-  const postData = async (job) => {
-    const data = { ...job };
-    await saveLeave(data);
+  // populate the data into form
 
-    //close the pop
-    setOpenPopup(false);
-    // send notify alert
-    setNotify({
-      isOpen: true,
-      message: "Successfull !",
-      type: "success",
-    });
-
-    fetchData();
+  const openInPopup = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //stop populating
   };
-  // fetching records from DB
+
   const fetchData = async () => {
-    const { data } = await getLeaves();
+    const { data } = await getDocuments();
     setRecords(data);
   };
   useEffect(() => {
     fetchData();
   }, []);
+
   return (
     <div>
-      <Paper className={classes.pagecontent}>
+      <Paper className={classes.pageContent}>
         <Toolbar>
           <Controls.Input
             label="search..."
@@ -153,7 +163,7 @@ export default function leaves() {
             onChange={handleSearch}
           />
           <Controls.Button
-            text="+ Leave record"
+            text="+ Add new documents"
             variant="outlined"
             size="medium"
             className={classes.newButton}
@@ -164,19 +174,22 @@ export default function leaves() {
             }}
           />
         </Toolbar>
+
         <TableContainer>
           <TableHeader />
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{record.leaveType}</TableCell>
-                <TableCell>{record.numberOfDays}</TableCell>
-                <TableCell>{record.leaveGroup}</TableCell>
+                <TableCell>{record.employee.fullName}</TableCell>
+                <TableCell>{record.employee.branch.name}</TableCell>
+                <TableCell>{record.documentType}</TableCell>
+                <TableCell>{record.details}</TableCell>
+
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInPopup(record);
                     }}
                   >
                     <EditOutlined />
@@ -192,7 +205,7 @@ export default function leaves() {
                       })
                     }
                   >
-                    <DeleteOutlined />
+                    <DeleteOutline />
                   </Controls.ActionButton>
                 </TableCell>
               </TableRow>
@@ -202,16 +215,17 @@ export default function leaves() {
         <Pagination />
       </Paper>
       <Popup
-        title="leave request "
+        title="Upload employee documents"
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >
-        <LeaveForm
+        <EmployeeDocumentForm
+          postData={postData}
           recordForEdit={recordForEdit}
           setNotify={setNotify}
-          postData={postData}
         />
       </Popup>
+
       <Notifications notify={notify} setNotify={setNotify} />
       <ConfirmDialog
         confirmDialog={confirmDialog}
