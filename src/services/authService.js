@@ -27,14 +27,26 @@ export function getCurrentUser() {
     // getting the token key in the local storage
     const token = localStorage.getItem(tokenKey);
     // decoding the payload and getting the logged in user name
+
     return jwtDecode(token);
   } catch (ex) {
     return null;
   }
 }
 
+export function loginWithJwt(jwt) {
+  localStorage.setItem(tokenKey, jwt);
+  window.location = "/admin/dashboard";
+}
+
+export function changePassword(id, user) {
+  return http.post(api + "/change-password/" + id, user);
+}
+
 export default {
   loginUser,
   logout,
   getCurrentUser,
+  changePassword,
+  loginWithJwt,
 };

@@ -17,7 +17,8 @@ import {
   deleteMedical,
   saveMedical,
 } from "./../../services/medicalService";
-
+import { Empty } from "antd";
+import Spin from "../common/useSpin";
 import ConfirmDialog from "../controls/ConfirmDialog";
 import Notifications from "views/controls/Notifications";
 
@@ -49,7 +50,7 @@ const headCells = [
 const Medical = () => {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
-  0;
+  const [isFetching, setIsFetching] = useState(false);
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -138,12 +139,15 @@ const Medical = () => {
   // fetching records from DB
   const fetchData = async () => {
     const { data } = await getMedicals();
+    setIsFetching(false);
     setRecords(data);
   };
   useEffect(() => {
+    setIsFetching(true);
+
     fetchData();
   }, []);
-
+  const { length: count } = records;
   return (
     <div>
       <Paper className={classes.pagecontent}>
@@ -177,6 +181,8 @@ const Medical = () => {
                     " ," +
                     record.allowedFor[0] +
                     " , " +
+                    record.allowedFor[3] +
+                    " , " +
                     record.allowedFor[2]}
                 </TableCell>
                 <TableCell>{record.allowedAmount}</TableCell>
@@ -207,6 +213,8 @@ const Medical = () => {
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+        {count === 0 && !isFetching && <Empty description="No data found" />}
         <Pagination />
       </Paper>
       <Popup

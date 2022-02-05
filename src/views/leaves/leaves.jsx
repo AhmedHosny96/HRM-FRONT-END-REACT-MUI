@@ -17,9 +17,10 @@ import {
   deleteLeave,
   saveLeave,
 } from "./../../services/leaveService";
-
+import { Empty } from "antd";
 import ConfirmDialog from "../controls/ConfirmDialog";
 import Notifications from "views/controls/Notifications";
+import Spin from "../common/useSpin";
 
 const useStyles = makeStyles((theme) => ({
   pagecontent: {
@@ -51,6 +52,8 @@ export default function leaves() {
   0;
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
+  const [isFetching, setIsFetching] = useState(false);
+
   const [notify, setNotify] = useState({
     isOpen: false,
     message: "",
@@ -137,11 +140,15 @@ export default function leaves() {
   // fetching records from DB
   const fetchData = async () => {
     const { data } = await getLeaves();
+    setIsFetching(false);
     setRecords(data);
   };
   useEffect(() => {
+    setIsFetching(true);
     fetchData();
   }, []);
+
+  const { length: count } = records;
   return (
     <div>
       <Paper className={classes.pagecontent}>
@@ -164,6 +171,7 @@ export default function leaves() {
             }}
           />
         </Toolbar>
+
         <TableContainer>
           <TableHeader />
           <TableBody>
@@ -199,6 +207,10 @@ export default function leaves() {
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+
+        {count === 0 && !isFetching && <Empty description="No data found" />}
+
         <Pagination />
       </Paper>
       <Popup

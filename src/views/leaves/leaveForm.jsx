@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-
 import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,16 +64,23 @@ export default function LeaveForm(props) {
       try {
         await postData(values);
       } catch (ex) {
-        setNotify({
-          isOpen: true,
-          message: ex.response.data,
-          type: "warning",
-        });
+        if (ex.response && ex.response.status < 404) {
+          setNotify({
+            isOpen: true,
+            message: ex.response.data,
+            type: "warning",
+          });
+        } else {
+          setNotify({
+            isOpen: true,
+            message: "SERVER ERROR - please contact your sytem admin !",
+            type: "error",
+          });
+        }
       }
     }
   };
 
-  const top100Films = ["Money hiest", "italian job"];
   return (
     <div className={classes.root}>
       <Form onSubmit={handleSubmit}>

@@ -67,11 +67,19 @@ export default function MedicalForm(props) {
       try {
         await postData(values);
       } catch (ex) {
-        setNotify({
-          isOpen: true,
-          message: ex.response.data,
-          type: "warning",
-        });
+        if (ex.response && ex.response.status < 404) {
+          setNotify({
+            isOpen: true,
+            message: ex.response.data,
+            type: "warning",
+          });
+        } else {
+          setNotify({
+            isOpen: true,
+            message: "SERVER ERROR - please contact your sytem admin !",
+            type: "error",
+          });
+        }
       }
     }
   };
@@ -87,7 +95,6 @@ export default function MedicalForm(props) {
           error={errors.name}
         />
         <Autocomplete
-          multiple
           id="employeeId"
           options={patient}
           size="small"

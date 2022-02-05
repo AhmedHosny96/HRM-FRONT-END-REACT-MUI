@@ -1,15 +1,13 @@
 import http from "./httpService";
 
-const URL = "http://localhost:5000/api/employees";
-
-const API = "http://localhost:5000/api/employees/names";
+const URL = "http://localhost:5000/api/employees/";
 
 export function getEmployees() {
   return http.get(URL);
 }
 
-export function getEmployeeNames() {
-  return http.get(API);
+export function getActiveEmployees() {
+  return http.get(URL + "active");
 }
 
 export function getEmployee(id) {

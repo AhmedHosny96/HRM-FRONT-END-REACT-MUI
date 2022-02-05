@@ -79,7 +79,7 @@ export default function JobsRecruitments() {
         />
         <Tab
           className={classes.tabText}
-          label="Recruitment details"
+          label="Recruitment process"
           {...a11yProps(1)}
         />
       </Tabs>

@@ -5,6 +5,7 @@ import {
   TableRow,
   TableCell,
   Toolbar,
+  LinearProgress,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
@@ -13,6 +14,8 @@ import EmployeeDocumentForm from "./EmployeeDocumentForm";
 
 import Controls from "../controls/controls";
 import { EditOutlined, DeleteOutline } from "@material-ui/icons/";
+import { Empty } from "antd";
+import "antd/dist/antd.css";
 import Popup from "../controls/Popup";
 import ConfirmDialog from "../controls/ConfirmDialog";
 import {
@@ -21,6 +24,7 @@ import {
   deleteDocument,
 } from "../../services/documentService";
 import Notifications from "views/controls/Notifications";
+import Spin from "./../common/useSpin";
 
 const useStyles = makeStyles((theme) => ({
   pageContent: {
@@ -54,6 +58,8 @@ const headCells = [
 
 export default function EmployeeDocuments() {
   const classes = useStyles();
+  const [isFetching, setIsFetching] = useState(false);
+
   const [records, setRecords] = useState([]);
 
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
@@ -147,10 +153,14 @@ export default function EmployeeDocuments() {
   const fetchData = async () => {
     const { data } = await getDocuments();
     setRecords(data);
+    setIsFetching(false);
   };
   useEffect(() => {
+    setIsFetching(true);
     fetchData();
   }, []);
+
+  const { length: count } = records;
 
   return (
     <div>
@@ -174,7 +184,6 @@ export default function EmployeeDocuments() {
             }}
           />
         </Toolbar>
-
         <TableContainer>
           <TableHeader />
           <TableBody>
@@ -212,6 +221,10 @@ export default function EmployeeDocuments() {
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+
+        {count === 0 && !isFetching && <Empty description="No data found" />}
+
         <Pagination />
       </Paper>
       <Popup

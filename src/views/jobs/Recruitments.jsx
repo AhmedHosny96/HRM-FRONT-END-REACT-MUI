@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
-
+import Spin from "../common/useSpin";
 import Controls from "../controls/controls";
 import {
   EditOutlined,
@@ -22,6 +22,8 @@ import {
   saveRecruitment,
   deleteRecruitment,
 } from "../../services/recruitmentService";
+import { Empty } from "antd";
+
 import Notifications from "views/controls/Notifications";
 import RecruitmentForm from "./RecruitmentForm";
 
@@ -38,9 +40,6 @@ const useStyles = makeStyles((theme) => ({
   newButton: {
     marginRight: theme.spacing(6),
     textTransform: "none",
-
-    // backgroundColor: "purple",
-    // color: "white",
   },
 }));
 
@@ -59,8 +58,8 @@ export default function Recruitments() {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [openPopup, setOpenPopup] = useState(false);
-  const [openPopupEdit, setOpenPopupEdit] = useState(false); // state variables for dialog pop up\
-  const [openPopupView, setOpenPopupView] = useState(false); // state variables for dialog pop up\
+
+  const [isFetching, setIsFetching] = useState(false);
 
   const [inputDisabled, setInputDisabled] = useState(false);
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
@@ -164,13 +163,27 @@ export default function Recruitments() {
   };
 
   const fetchData = async () => {
-    const { data } = await getRecruitments();
-    setRecords(data);
+    try {
+      const { data } = await getRecruitments();
+      setIsFetching(false);
+      setRecords(data);
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message: "Unexpected error occurred !",
+          type: "error",
+        });
+      }
+    }
   };
   useEffect(() => {
+    setIsFetching(true);
     fetchData();
   }, []);
 
+  const { length: count } = records;
   return (
     <div>
       <Paper className={classes.pageContent}>
@@ -193,7 +206,6 @@ export default function Recruitments() {
             }}
           />
         </Toolbar>
-
         <TableContainer>
           <TableHeader />
 
@@ -241,6 +253,9 @@ export default function Recruitments() {
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+        {count === 0 && !isFetching && <Empty description="No data found" />}
+
         <Pagination />
       </Paper>
       <Popup

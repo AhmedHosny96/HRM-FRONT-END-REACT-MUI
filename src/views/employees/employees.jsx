@@ -9,7 +9,7 @@ import {
 import EmployeeForm from "./employeeForm";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
-
+import { Empty } from "antd";
 import {
   getEmployees,
   saveEmployee,
@@ -20,10 +20,10 @@ import { EditOutlined, DeleteOutlined } from "@material-ui/icons/";
 import Popup from "../controls/Popup";
 import Notifications from "../controls/Notifications";
 import ConfirmDialog from "../controls/ConfirmDialog";
-
+import Spin from "../common/useSpin";
 const useStyles = makeStyles((theme) => ({
   pageContent: {
-    margin: theme.spacing(2),
+    margin: theme.spacing(0),
     padding: theme.spacing(1),
   },
   search: {
@@ -55,6 +55,7 @@ const headCells = [
 export default function employees({ user }) {
   console.log(user);
   const classes = useStyles();
+  const [isFetching, setIsFetching] = useState(false);
   const [records, setRecords] = useState([]);
 
   const [openPopup, setOpenPopup] = useState(false); // pop dialog
@@ -139,18 +140,25 @@ export default function employees({ user }) {
       message: "Deleted Successfully!",
       type: "error",
     });
+
     fetchData();
   };
 
   // fetching data into table
   const fetchData = async () => {
-    const { data } = await getEmployees();
-    setRecords(data);
+    try {
+      const { data } = await getEmployees();
+      setRecords(data);
+      setIsFetching(false);
+    } catch (ex) {}
   };
 
   useEffect(() => {
+    setIsFetching(true);
     fetchData();
   }, []);
+
+  const { length: count } = records;
 
   return (
     <div>
@@ -172,21 +180,21 @@ export default function employees({ user }) {
             className={classes.newButton}
           />
         </Toolbar>
-
+        {/* <hr style={{ borderTop: " 1px light lightGray" }} /> */}
         <TableContainer>
           <TableHeader />
+
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
                 <TableCell>{record.employeeId}</TableCell>
-
                 <TableCell>{record.fullName}</TableCell>
                 <TableCell>{record.email}</TableCell>
                 <TableCell>{record.phoneNumber}</TableCell>
+
                 <TableCell>{record.job.name}</TableCell>
                 <TableCell>{record.branch.name}</TableCell>
                 <TableCell>{record.status}</TableCell>
-
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
@@ -196,7 +204,7 @@ export default function employees({ user }) {
                   >
                     <EditOutlined />
                   </Controls.ActionButton>
-                  {user && user.isAdmin && (
+                  {user && (
                     <Controls.ActionButton
                       color="secondary"
                       onClick={() =>
@@ -215,6 +223,8 @@ export default function employees({ user }) {
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+        {count === 0 && !isFetching && <Empty description="No data found" />}
 
         <Pagination />
       </Paper>

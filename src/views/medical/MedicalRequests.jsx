@@ -20,7 +20,8 @@ import {
 import ConfirmDialog from "../controls/ConfirmDialog";
 import Notifications from "views/controls/Notifications";
 import MedicalRequestForm from "./MedicalRequestForm";
-
+import { Empty } from "antd";
+import Spin from "../common/useSpin";
 const useStyles = makeStyles((theme) => ({
   pagecontent: {
     margin: theme.spacing(2),
@@ -52,7 +53,8 @@ const headCells = [
 const MedicalRequests = () => {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
-  0;
+  const [isFetching, setIsFetching] = useState(false);
+
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -90,7 +92,7 @@ const MedicalRequests = () => {
         //do the filter
         else
           return items.filter((item) =>
-            item.name.toLowerCase().includes(target.value)
+            item.employee.fullName.toLowerCase().includes(target.value)
           );
       },
     });
@@ -141,12 +143,15 @@ const MedicalRequests = () => {
   // fetching records from DB
   const fetchData = async () => {
     const { data } = await getMedicalRequests();
+    setIsFetching(false);
     setRecords(data);
   };
   useEffect(() => {
+    setIsFetching(true);
+
     fetchData();
   }, []);
-
+  const { length: count } = records;
   return (
     <div>
       <Paper className={classes.pagecontent}>
@@ -207,6 +212,9 @@ const MedicalRequests = () => {
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+
+        {count === 0 && !isFetching && <Empty description="No data found" />}
         <Pagination />
       </Paper>
       <Popup

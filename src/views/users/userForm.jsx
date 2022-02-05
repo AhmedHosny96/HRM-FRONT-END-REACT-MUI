@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, Form } from "../../views/common/useForm";
 
 import Controls from "../../views/controls/controls";
 import { makeStyles } from "@material-ui/core/styles";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { getEmployees } from "./../../services/employeeService";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -11,18 +13,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const roles = ["HR admin", "HR officer"];
+const roles = ["Admin", "User"];
 
 const initialValues = {
-  name: "",
+  employeeId: "",
+  username: "",
   email: "",
-  phone: "",
-  userRole: "",
-  password: "",
+  // userRole: "",
 };
 
 export default function userForm(props) {
-  const { postData } = props;
+  const { postData, setNotify, recordForEdit } = props;
   const classes = useStyles();
 
   // form validation
@@ -30,19 +31,12 @@ export default function userForm(props) {
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
 
-    if ("name" in fieldValues)
-      temp.name = fieldValues.name ? "" : "Name is required";
+    if ("username" in fieldValues)
+      temp.username = fieldValues.username ? "" : "username is required";
     if ("email" in fieldValues)
       temp.email = /&^|.+@.+..+/.test(fieldValues.email)
         ? ""
         : "Invalid email address";
-    if ("phone" in fieldValues)
-      temp.phone = fieldValues.phone ? "" : "Phone number is required";
-    if ("userRole" in fieldValues)
-      temp.userRole = fieldValues.userRole ? "" : "User role is required";
-
-    if ("password" in fieldValues)
-      temp.password = fieldValues.password ? "" : "Password is required";
 
     setErrors({
       ...temp,
@@ -50,7 +44,7 @@ export default function userForm(props) {
 
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
-  const { values, errors, setErrors, handleOnChange } = useForm(
+  const { values, errors, setValues, setErrors, handleOnChange } = useForm(
     initialValues,
     true,
     validate
@@ -61,23 +55,54 @@ export default function userForm(props) {
     e.preventDefault();
 
     if (validate()) {
-      try {
-        await postData(values);
-      } catch (ex) {
-        window.alert(ex.response.data);
-      }
+      await postData(values);
     }
   };
+  const [employee, setEmployee] = useState("");
+
+  const populateValues = async () => {
+    const { data: employees } = await getEmployees();
+    setEmployee(employees);
+  };
+
+  useEffect(() => {
+    populateValues();
+    if (recordForEdit != null) {
+      setValues({
+        ...recordForEdit,
+      });
+    }
+  }, []);
 
   return (
     <div className={classes.root}>
       <Form onSubmit={handleSubmit}>
+        <Autocomplete
+          disablePortal
+          id="employeeId"
+          options={employee}
+          noOptionsText="No employee data"
+          size="small"
+          sx={{ width: 300 }}
+          getOptionLabel={(employee) => employee.fullName}
+          renderInput={(params) => (
+            <Controls.Input
+              {...params}
+              label="Employee"
+              value={values.employeeId}
+              onChange={handleOnChange}
+            />
+          )}
+          onChange={(event, selectedValue) => {
+            setValues({ employeeId: selectedValue._id });
+          }}
+        />
         <Controls.Input
-          name="name"
-          label="Name"
-          values={values.name}
+          name="username"
+          label="Username"
+          values={values.username}
           onChange={handleOnChange}
-          error={errors.name}
+          error={errors.username}
         />
         <Controls.Input
           name="email"
@@ -86,29 +111,15 @@ export default function userForm(props) {
           onChange={handleOnChange}
           error={errors.email}
         />
-        <Controls.Input
-          name="phone"
-          label="Phone"
-          values={values.phone}
-          onChange={handleOnChange}
-          error={errors.phone}
-        />
-        <Controls.Input
-          name="password"
-          label="Password"
-          type="password"
-          values={values.password}
-          onChange={handleOnChange}
-          error={errors.password}
-        />
-        <Controls.Select
+
+        {/* <Controls.Select
           name="userRole"
           label="User role"
           value={values.userRole}
           options={roles}
           onChange={handleOnChange}
           error={errors.userRole}
-        ></Controls.Select>
+        ></Controls.Select> */}
         <Controls.Button text="Submit" type="submit" />
       </Form>
     </div>

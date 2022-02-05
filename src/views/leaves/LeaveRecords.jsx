@@ -3,6 +3,7 @@ import { Box, Typography, Tabs, Tab } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import Leaves from "./Leaves.jsx";
+import LeaveRequests from "./LeaveRequests.jsx";
 
 const useStyles = makeStyles((theme) => ({
   pageContent: {
@@ -86,7 +87,9 @@ export default function JobsRecruitments() {
       <TabPanel value={value} index={0}>
         <Leaves />
       </TabPanel>
-      <TabPanel value={value} index={1}></TabPanel>
+      <TabPanel value={value} index={1}>
+        <LeaveRequests />
+      </TabPanel>
     </div>
   );
 }

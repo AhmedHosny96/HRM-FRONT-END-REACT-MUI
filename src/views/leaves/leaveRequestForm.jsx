@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { useForm, Form } from "../common/useForm";
 import Controls from "../controls/controls";
 import {
-  getEmployeeByBranch,
+  getActiveEmployees,
   getEmployees,
 } from "../../services/employeeService";
-import { getBranches } from "../../services/branchService";
-
+import { getLeaves } from "../../services/leaveService";
+import { getActiveBranches } from "services/branchService";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -17,26 +18,24 @@ const useStyles = makeStyles((theme) => ({
 
 // const employees = ["Ahmed ", "Hosny"];
 
-const leaves = ["Anual leave ", "Sick Leave"];
-
 const initialValues = {
-  branchId: "",
   employeeId: "",
-  type: "",
-  department: "",
-  startDate: "",
-  returnDate: "",
+  leaveId: "",
+  startDate: new Date(),
+  returnDate: new Date(),
+  leave: [],
+  employee: [],
 };
-export default function leaveForm(props) {
+export default function LeaveRequestForm(props) {
   const classes = useStyles();
-  const { recordForEdit, setNotify } = props;
-
+  const { postData, recordForEdit, setNotify } = props;
+  const [leaves, setLeaves] = useState([]);
   //validation
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
-    if ("branchId" in fieldValues)
-      temp.branchId = fieldValues.branchId ? "" : "select your branch";
+    // if ("branchId" in fieldValues)
+    //   temp.branchId = fieldValues.branchId ? "" : "select your branch";
     if ("employeeId" in fieldValues)
       temp.employeeId = fieldValues.employeeId ? "" : "employee is required";
     if ("type" in fieldValues)
@@ -58,56 +57,31 @@ export default function leaveForm(props) {
     validate
   );
 
-  const [branches, setBranches] = useState([]);
+  const [employee, setEmployee] = useState("");
 
   //populating data into form
 
-  // const onChangeCombo = (e) => {
-  //   const selectId = e.target.value;
-
-  //   const selectedBranch = branches.filter(
-  //     (branch) => branch._id == selectId
-  //   )[0];
-  //   console.log(selectedBranch);
-  //   const selectedEmpoyee = employees.filter(
-  //     (employee) => employee._id == selectId
-  //   );
-
-  //   setValues({
-  //     branchId: selectedBranch._id,
-  //     employeeId: selectedEmpoyee._id,
-  //   });
-
-  //   setBranches(selectedBranch);
-  // };
-
-  // const populateVales = async () => {
-  //   const { data: branch } = await getBranches();
-
-  //   setBranches(branch);
-
-  //   // const { response } = await getEmployeeByBranch(values.branchId);
-  //   // setEmployees(response);
-
-  //   console.log("popu" + branch[1][0]);
-  // };
-  //
+  const populateValues = async () => {
+    const { data: employees } = await getEmployees();
+    setEmployee(employees);
+  };
+  const populateLeaves = async () => {
+    const { data: leave } = await getLeaves();
+    setLeaves(leave);
+  };
 
   useEffect(async () => {
-    const { data: branch } = await getBranches();
-    setBranches(branch);
+    populateValues();
 
-    if (values != null) {
+    populateLeaves();
+
+    if (recordForEdit != null) {
       setValues({
-        branchId: branches.filter((brId) => brId._id),
-        ...values,
+        ...recordForEdit,
+        // employeeId: recordForEdit.employee._id,
       });
-
-      // setValues({branchId : branches.filter})
     }
-
-    //populate if there are records
-  });
+  }, [recordForEdit]);
 
   //saving data to db
 
@@ -115,66 +89,85 @@ export default function leaveForm(props) {
     e.preventDefault();
 
     // if (validate()) {
-    //   try {
-    //     // await postData(values);
-    //   } catch (ex) {
-    //     setNotify({
-    //       isOpen: true,
-    //       message: ex.response.data,
-    //       type: "warning",
-    //     });
-    //   }
-    // }
+    try {
+      await postData(values);
+    } catch (ex) {
+      setNotify({
+        isOpen: true,
+        message: ex.response.data,
+        type: "warning",
+      });
+      // }
+    }
   };
 
   return (
     <div className={classes.root}>
-      {/* {console.log("branchId " + values.branchId)} */}
-      {/* {console.log("branchId " + values.branchId)} */}
-
       <Form onSubmit={handleSubmit}>
-        <Controls.Select
-          name="branchId"
-          label="branch"
-          value={values.branchId}
-          options={branches}
-          onChange={handleOnChange}
-          error={errors.branchId}
+        <Autocomplete
+          disablePortal
+          id="employeeId"
+          options={employee}
+          size="small"
+          sx={{ width: 300 }}
+          getOptionLabel={(employee) => employee.fullName || employee}
+          renderInput={(params) => (
+            <Controls.Input
+              {...params}
+              label="Employee"
+              value={values.employeeId}
+              onChange={handleOnChange}
+            />
+          )}
+          onChange={(event, selectedValue) => {
+            setValues({ employeeId: selectedValue._id });
+          }}
         />
-        {/* {getEmployeeByBranch(values.branchId)} */}
 
+        <Autocomplete
+          disablePortal
+          id="leaveId"
+          options={leaves}
+          size="small"
+          sx={{ width: 300 }}
+          getOptionLabel={(leaves) => leaves.leaveType || leaves}
+          renderInput={(params) => (
+            <Controls.Input
+              {...params}
+              label="Leave type"
+              value={values.leaveId}
+              onChange={handleOnChange}
+            />
+          )}
+          onChange={(event, selectedValue) => {
+            setValues({ leaveId: selectedValue._id }, console.log(leaveId));
+          }}
+        />
         {/* <Controls.Select
-          name="employeeId"
-          label="Employee"
-          value={values.employeeId}
-          options={employees}
-          onChange={handleOnChange}
-          error={errors.employeeId}
-        /> */}
-
-        {/* <Controls.Select
-          name="type"
-          label="Leave type"
-          value={values.type}
+          name="leaveId"
+          label="Leave"
+          value={values.leaveId}
           options={leaves}
           onChange={handleOnChange}
-          error={errors.type}
+          error={errors.leaveId}
+          required
         /> */}
         <Controls.Date
           name="startDate"
           label="Start date"
           value={values.startDate}
           onChange={handleOnChange}
+          type="Date"
         />
         <Controls.Date
           name="returnDate"
           label="Return date"
           value={values.returnDate}
           onChange={handleOnChange}
+          type="Date"
         />
+        <Controls.Button text="Submit" type="submit" />
       </Form>
-
-      <Controls.Button text="Apply" type="submit" />
     </div>
   );
 }

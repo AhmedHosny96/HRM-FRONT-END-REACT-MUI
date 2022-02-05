@@ -38,16 +38,18 @@ export default function employeeForm(props) {
     let temp = { ...errors };
 
     if ("employeeId" in fieldValues)
-      temp.employeeId = fieldValues.employeeId ? "" : "ID no is required";
+      temp.employeeId = /^RMF/.test(fieldValues.employeeId)
+        ? ""
+        : "Invalid ID code ";
 
     if ("fullName" in fieldValues)
       temp.fullName = fieldValues.fullName ? "" : "Full name is required";
     if ("email" in fieldValues)
       temp.email = /$^|.+@.+..+/.test(fieldValues.email) ? "" : "Invalid email";
     if ("phoneNumber" in fieldValues)
-      temp.phoneNumber = fieldValues.phoneNumber
+      temp.phoneNumber = /^2519.{8}$/.test(fieldValues.phoneNumber)
         ? ""
-        : "Phone number is required";
+        : "Invalid phone number";
     if ("gender" in fieldValues)
       temp.gender = fieldValues.gender ? "" : "Gender is required";
     if ("jobId" in fieldValues)
@@ -76,6 +78,8 @@ export default function employeeForm(props) {
     const { data: jobs } = await getJobs();
 
     setBranches(branch);
+
+    console.log(branch);
     setJobs(jobs);
   };
 
@@ -117,7 +121,7 @@ export default function employeeForm(props) {
         label="Employee Id"
         value={values.employeeId}
         onChange={handleOnChange}
-        error={errors.fullName}
+        error={errors.employeeId}
         required
       />
       <Controls.Input

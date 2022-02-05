@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -20,7 +20,7 @@ const useStyles = makeStyles(styles);
 export default function Admin({ user }, { ...rest }) {
   // styles
   const classes = useStyles();
-  // console.log(user);
+
   const switchRoutes = (
     <Switch>
       {routes.map((prop, key) => {
@@ -35,6 +35,7 @@ export default function Admin({ user }, { ...rest }) {
             />
           );
         }
+
         return null;
       })}
       <Redirect from="/admin" to="/admin/dashboard" />

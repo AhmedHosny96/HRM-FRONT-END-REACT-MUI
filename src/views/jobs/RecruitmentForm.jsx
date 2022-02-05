@@ -14,11 +14,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const initialValues = {
-  jobId: "",
   branchId: "",
+  jobId: "",
   requiredNumber: "",
+  jobDescription: "",
   employementType: "",
-  details: "",
   status: "Pending",
 };
 
@@ -85,17 +85,35 @@ export default function RecruitmentForm(props) {
       try {
         await postData(values);
       } catch (ex) {
-        setNotify({
-          isOpen: true,
-          message: ex.response.data,
-          type: "warning",
-        });
+        if (ex.response && ex.response.status < 404) {
+          setNotify({
+            isOpen: true,
+            message: ex.response.data,
+            type: "warning",
+          });
+        } else {
+          setNotify({
+            isOpen: true,
+            message: "SERVER ERROR - please contact your sytem admin !",
+            type: "error",
+          });
+        }
       }
     }
   };
   return (
     <div className={classes.root}>
       <Form onSubmit={handleSubmit}>
+        <Controls.Select
+          name="branchId"
+          label="Branch"
+          value={values.branchId}
+          options={branch}
+          onChange={handleOnChange}
+          error={errors.department}
+          disabled={inputDisabled}
+          required
+        />
         <Controls.Select
           name="jobId"
           label="Position"
@@ -107,16 +125,6 @@ export default function RecruitmentForm(props) {
           required
         />
 
-        <Controls.Select
-          name="branchId"
-          label="Branch"
-          value={values.branchId}
-          options={branch}
-          onChange={handleOnChange}
-          error={errors.department}
-          disabled={inputDisabled}
-          required
-        />
         <Controls.Input
           name="requiredNumber"
           label="Required number"
@@ -137,13 +145,16 @@ export default function RecruitmentForm(props) {
           required
         />
         <Controls.Input
-          name="details"
-          label="Detailed info"
-          value={values.details}
+          name="jobDescription"
+          label="Job description"
+          value={values.jobDescription}
           onChange={handleOnChange}
           error={errors.name}
           type="textArea"
           disabled={inputDisabled}
+          multiline
+          rows={2}
+          maxRows={4}
         />
         {recordForEdit && (
           <Controls.Select

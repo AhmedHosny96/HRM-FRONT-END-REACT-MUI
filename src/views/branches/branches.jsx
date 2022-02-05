@@ -10,7 +10,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
 import BranchForm from "./branchForm";
 import Controls from "../controls/controls";
-import { Search, Add, DeleteOutline } from "@material-ui/icons/";
 import Popup from "../controls/Popup";
 import ConfirmDialog from "../controls/ConfirmDialog";
 import {
@@ -19,15 +18,17 @@ import {
   deleteBranch,
 } from "../../services/branchService";
 import Notifications from "views/controls/Notifications";
+import Spin from "../common/useSpin";
+import { Empty } from "antd";
 
-import { EditOutlined } from "@material-ui/icons/";
+import { EditOutlined, DeleteOutlined } from "@material-ui/icons/";
 const useStyles = makeStyles((theme) => ({
   pageContent: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(0),
     padding: theme.spacing(1),
   },
   searchInput: {
-    width: "42%",
+    width: "40%",
     position: "absolute",
     right: "10px",
   },
@@ -53,6 +54,8 @@ const headCells = [
 
 export default function Branches({ user }) {
   const classes = useStyles();
+  const [isFetching, setIsFetching] = useState(false);
+
   const [records, setRecords] = useState([]);
   0;
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
@@ -148,10 +151,14 @@ export default function Branches({ user }) {
   const fetchData = async () => {
     const { data } = await getBranches();
     setRecords(data);
+    setIsFetching(false);
   };
   useEffect(() => {
+    setIsFetching(true);
+
     fetchData();
   }, []);
+  const { length: count } = records;
 
   return (
     <div>
@@ -175,7 +182,6 @@ export default function Branches({ user }) {
             }}
           />
         </Toolbar>
-
         <TableContainer>
           <TableHeader />
           <TableBody>
@@ -205,13 +211,17 @@ export default function Branches({ user }) {
                       })
                     }
                   >
-                    <DeleteOutline />
+                    <DeleteOutlined />
                   </Controls.ActionButton>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+
+        {count === 0 && !isFetching && <Empty description="No data found" />}
+
         <Pagination />
       </Paper>
       <Popup

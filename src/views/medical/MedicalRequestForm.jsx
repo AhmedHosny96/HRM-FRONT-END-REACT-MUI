@@ -5,7 +5,10 @@ import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { Gender, statuses, patient } from "../../views/common/dropDownValues";
-import { getEmployees } from "./../../services/employeeService";
+import {
+  getActiveEmployees,
+  getEmployees,
+} from "./../../services/employeeService";
 import { getMedicals } from "./../../services/medicalService";
 
 const useStyles = makeStyles((theme) => ({
@@ -61,7 +64,7 @@ export default function MedicalRequestForm(props) {
   //populating data into form
 
   const populateValues = async () => {
-    const { data: employees } = await getEmployees();
+    const { data: employees } = await getActiveEmployees();
     setEmployee(employees);
   };
 
@@ -92,11 +95,19 @@ export default function MedicalRequestForm(props) {
     try {
       await postData(values);
     } catch (ex) {
-      setNotify({
-        isOpen: true,
-        message: ex.response.data,
-        type: "warning",
-      });
+      if (ex.response && ex.response.status < 404) {
+        setNotify({
+          isOpen: true,
+          message: ex.response.data,
+          type: "warning",
+        });
+      } else {
+        setNotify({
+          isOpen: true,
+          message: "SERVER ERROR - please contact your sytem admin !",
+          type: "error",
+        });
+      }
     }
   };
 
@@ -160,7 +171,7 @@ export default function MedicalRequestForm(props) {
           <Controls.Input
             name="name"
             label="name"
-            value={values.name}
+            value={values.name || values.employee}
             onChange={handleOnChange}
           />
         )}

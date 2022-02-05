@@ -4,6 +4,15 @@ import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
 import { getEmployees } from "./../../services/employeeService";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import app from "./../common/firebase";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -12,13 +21,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const initialValues = {
-  employeeId: "",
-  documentType: "",
-  details: "",
+  // employeeId: "",
+  // documentType: "",
+  // details: "",
   attachment: "",
 };
 export default function EmployeeDocumentForm(props) {
   const classes = useStyles();
+
+  const [attachment, setAttachment] = useState(null);
+  const [downloadURL, setDownloadURL] = useState();
 
   const { postData, recordForEdit, setNotify } = props;
 
@@ -39,7 +51,7 @@ export default function EmployeeDocumentForm(props) {
 
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
-  const { values, setValues, errors, setErrors, handleOnChange } = useForm(
+  const { values, setValues, errors, setErrors } = useForm(
     initialValues,
     true,
     validate
@@ -56,7 +68,7 @@ export default function EmployeeDocumentForm(props) {
   useEffect(() => {
     //populate if there are records
 
-    populateEmployees();
+    // populateEmployees();
 
     if (recordForEdit != null)
       setValues({
@@ -65,31 +77,45 @@ export default function EmployeeDocumentForm(props) {
       });
   }, [recordForEdit]);
 
+  const handleOnChange = (files) => {
+    // console.log(files[0]);
+    setAttachment(files[0]);
+  };
+
   //saving data to db
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // if (validate()) {
     try {
-      const data = new FormData();
-
-      // data.append("employeeId", values.employeeId);
-      data.append("documentType", values.documentType);
-      data.append("details", values.details);
-      data.append("attachment", e.target.files[0]);
-
-      console.log(e.target.files[0]);
-
-      await postData(data);
-    } catch (ex) {
-      setNotify({
-        isOpen: true,
-        message: ex.response.data,
-        type: "warning",
-      });
+      const fileName = new Date().getTime() + attachment.name;
+      const storage = getStorage(app);
+      const storageRef = ref(storage, `documents/${fileName}`);
+      const uploadTask = uploadBytesResumable(storageRef, attachment);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {},
+        () => {},
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadLink) => {
+            setDownloadURL(downloadLink);
+            const img = document.getElementById("img-preview");
+            img.setAttribute("src", downloadLink);
+          });
+        }
+      );
+      alert("success");
+    } catch (error) {
+      alert("error occured" + error);
     }
-    // }
+  };
+
+  const showImage = () => {
+    // const storage = getStorage(app);
+    // getDownloadURL(ref(storage, `documents/${attachment.name}`)).then((url) => {
+    //   const img = document.getElementById("img-preview");
+    //   img.setAttribute("src", url);
+    // });
   };
 
   return (
@@ -113,7 +139,7 @@ export default function EmployeeDocumentForm(props) {
           onChange={(event, selectedValue) => {
             setValues({ employeeId: selectedValue._id });
           }}
-        /> */}
+        />
         <Controls.Input
           name="documentType"
           label="Document Type"
@@ -128,15 +154,17 @@ export default function EmployeeDocumentForm(props) {
           value={values.details}
           onChange={handleOnChange}
           error={errors.details}
-        />
+        /> */}
+
         <Controls.Input
           name="attachment"
           type="file"
-          value={values.attachment}
-          onChange={handleOnChange}
+          onChange={(e) => handleOnChange(e.target.files)}
           error={errors.attachment}
         />
         <Controls.Button text="Submit" type="submit" />
+        <Controls.Button text="download image" onClick={showImage} />
+        <img id="img-preview" />
       </Form>
     </div>
   );

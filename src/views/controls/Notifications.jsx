@@ -17,7 +17,7 @@ export default function Notifications(props) {
   return (
     <Snackbar
       open={notify.isOpen}
-      autoHideDuration={3000}
+      autoHideDuration={5000}
       onClose={() =>
         setNotify({
           isOpen: false,

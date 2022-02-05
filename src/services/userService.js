@@ -1,10 +1,6 @@
 import http from "./httpService";
 
-const api = "http://localhost:5000/api/users";
-
-export function getUsers() {
-  return http.get(api);
-}
+const api = "http://localhost:5000/api/auth/create";
 
 export function getUser(id) {
   return http.get(api + "/" + id);
@@ -19,7 +15,11 @@ export function saveUser(user) {
   // return http.post(api + "/" + id + "/" + token, user) || http.post(api, user);
   return http.post(api, user);
 }
+const URL = "http://localhost:5000/api/users";
 
+export function getUsers() {
+  return http.get(URL);
+}
 export function deleteUser(id) {
-  return http.delete(api + "/" + id);
+  return http.delete(URL + "/" + id);
 }

@@ -6,27 +6,26 @@ import {
   TableRow,
   Toolbar,
   makeStyles,
-  InputAdornment,
 } from "@material-ui/core";
 import UserForm from "./userForm";
 import Controls from "../../views/controls/controls";
 import { useTable } from "views/common/useTable";
-import { getUsers, saveUser } from "./../../services/userService";
+import { getUsers, saveUser, deleteUser } from "./../../services/userService";
 import Popup from "../../views/controls/Popup";
 import Notifications from "../../views/controls/Notifications";
 import {
   EditOutlined,
   DeleteOutlined,
-  Add,
   LockOpenOutlined,
-  Search,
 } from "@material-ui/icons";
-
+import ConfirmDialog from "../controls/ConfirmDialog";
+import { Empty } from "antd";
+import Spin from "../common/useSpin";
 //custom styles
 const useStyles = makeStyles((theme) => ({
   pageContent: {
-    margin: theme.spacing(5),
-    padding: theme.spacing(3),
+    margin: theme.spacing(0),
+    padding: theme.spacing(1),
   },
   searchInput: {
     width: "40%",
@@ -42,15 +41,20 @@ const useStyles = makeStyles((theme) => ({
 // column header configurations
 
 const headCells = [
+  { id: "employee", label: "Employee" },
   { id: "username", label: "username" },
-  { id: "employee", label: "employee" },
-  { id: "phone", label: "phone number" },
+  { id: "email", label: "Email" },
+  { id: "", label: "Role" },
+  { id: "status", label: "Status" },
+  // { id: "role", label: "Role" },
   { id: "action ", label: "Action", disableSort: true },
 ];
 
 export default function Users() {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
+  const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
     isOpen: false,
     message: "",
@@ -61,6 +65,12 @@ export default function Users() {
     fn: (items) => {
       return items;
     },
+  });
+
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    subTitle: "",
   });
 
   const {
@@ -87,6 +97,32 @@ export default function Users() {
     });
   };
 
+  const openInPopup = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //stop populating
+  };
+
+  //handle delete
+
+  const handleDelete = async (user) => {
+    setConfirmDialog({
+      ...confirmDialog,
+      isOpen: false,
+    });
+    records.filter((u) => u._id != user._id);
+    await deleteUser(user._id);
+
+    setNotify({
+      isOpen: true,
+      message: "Deleted Successfully!",
+      type: "error",
+    });
+    fetchData();
+  };
+
   const postData = async (user) => {
     const data = { ...user };
     // save the user to db
@@ -96,7 +132,7 @@ export default function Users() {
     // notify sucess
     setNotify({
       isOpen: true,
-      message: "An Email has been sent to the user email with the OTP",
+      message: ` One-time password  is sent to ${user.email}`,
       type: "success",
     });
     // refresh the table
@@ -108,13 +144,16 @@ export default function Users() {
 
   const fetchData = async () => {
     const { data } = await getUsers();
+    setIsFetching(false);
     setRecords(data);
   };
 
   useEffect(() => {
+    setIsFetching(true);
+
     fetchData();
   }, []);
-
+  const { length: count } = records;
   return (
     <div>
       <Paper className={classes.pageContent}>
@@ -122,23 +161,18 @@ export default function Users() {
           <Controls.Input
             label="Search..."
             size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
             className={classes.searchInput}
             onChange={handleSearch}
           ></Controls.Input>
           <Controls.Button
-            text="Add user"
+            text="+ Add new user"
             variant="outlined"
             size="medium"
-            startIcon={<Add />}
             className={classes.newButton}
-            onClick={() => setOpenPopup(true)}
+            onClick={() => {
+              setOpenPopup(true);
+              setRecordForEdit(null);
+            }}
           />
         </Toolbar>
         <TableContainer>
@@ -147,8 +181,10 @@ export default function Users() {
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
                 <TableCell>{record.employee.fullName}</TableCell>
+                <TableCell>{record.username}</TableCell>
                 <TableCell>{record.email}</TableCell>
-                <TableCell>{record.isAdmin}</TableCell>
+                <TableCell>{record.isAdmin ? "Admin" : "User"}</TableCell>
+                <TableCell>{record.status}</TableCell>
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
@@ -159,7 +195,18 @@ export default function Users() {
                   <Controls.ActionButton color="primary">
                     <LockOpenOutlined />
                   </Controls.ActionButton>
-                  <Controls.ActionButton color="secondary">
+                  <Controls.ActionButton
+                    color="secondary"
+                    color="secondary"
+                    onClick={() =>
+                      setConfirmDialog({
+                        isOpen: true,
+                        title: "Are you sure you want to delete this ?",
+                        subTitle: "",
+                        onConfirm: () => handleDelete(record),
+                      })
+                    }
+                  >
                     <DeleteOutlined />
                   </Controls.ActionButton>
                 </TableCell>
@@ -167,6 +214,8 @@ export default function Users() {
             ))}
           </TableBody>
         </TableContainer>
+        {isFetching && <Spin />}
+        {count === 0 && !isFetching && <Empty description="No data found" />}
         <Pagination />
       </Paper>
       <Popup
@@ -174,9 +223,18 @@ export default function Users() {
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >
-        <UserForm postData={postData} />
+        <UserForm
+          postData={postData}
+          setNotify={setNotify}
+          recordForEdit={recordForEdit}
+        />
       </Popup>
       <Notifications notify={notify} setNotify={setNotify} />
+
+      <ConfirmDialog
+        confirmDialog={confirmDialog}
+        setConfirmDialog={setConfirmDialog}
+      />
     </div>
   );
 }

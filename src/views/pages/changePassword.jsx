@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Grid, InputAdornment, Avatar, Typography } from "@material-ui/core";
-import { LockOutlined } from "@material-ui/icons";
+import { Grid, Avatar, Typography } from "@material-ui/core";
+import { VpnKeyTwoTone } from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
 import brand from "../../../src/www.jpg";
 
-import { Lock, Email } from "@material-ui/icons";
 import Controls from "../controls/controls";
 import { useForm, Form } from "../common/useForm";
 import auth from "../../services/authService";
 import Notifications from "../../views/controls/Notifications";
+import Alert from "@material-ui/lab/Alert";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   inputContainer: {
     display: "flex",
     flexDirection: "column",
-    marginTop: "-50px",
+    marginTop: "-120px",
     maxWidth: 400,
     minWidth: 350,
   },
@@ -46,16 +46,16 @@ const useStyles = makeStyles((theme) => ({
 //initial values
 
 const initialValues = {
-  email: "",
   password: "",
+  confirmPassword: "",
 };
 
-export default function login(props) {
+export default function ChangePassword(props) {
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
 
-    if ("email" in fieldValues)
-      temp.email = /$^|.+@.+..+/.test(fieldValues.email) ? "" : "Invalid email";
+    if ("password" in fieldValues && "confirmPassowrd" in fieldValues)
+      temp.password != temp.confirmPassword ? "" : "Password doesnt match";
 
     setErrors({
       ...temp,
@@ -69,7 +69,6 @@ export default function login(props) {
     true,
     validate
   );
-  const [currentUser, setCurrentUser] = useState([]);
   const [notify, setNotify] = useState({
     isOpen: false,
     message: "",
@@ -83,31 +82,43 @@ export default function login(props) {
     e.preventDefault();
 
     try {
+      const userId = props.match.params.id;
       //
-      const { email, password } = { ...values };
-      await auth.loginUser(email, password);
+      const password = { ...values };
+      await auth.changePassword(userId, password);
 
-      const user = auth.getCurrentUser();
-      console.log(user._id);
-      if (user.firstLogin == 1) {
-        window.location = `/change-password/${user._id}`;
-      } else {
-        window.location = "/admin/dashboard";
-      }
+      // get the token
 
-      // if (currentUser.firstLogin === 0) window.location = "/admin/dashboard";
-    } catch (ex) {
+      const token = localStorage.getItem("token");
+
+      console.log(token);
+      auth.loginWithJwt(token);
+
       setNotify({
         isOpen: true,
-        message: ex.response.data,
-        type: "error",
+        message: "User verified successfully",
+        type: "success",
       });
+      // login with jwt
+    } catch (ex) {
+      //   setNotify({
+      //     isOpen: true,
+      //     message: ex.response.data,
+      //     type: "error",
+      //   });
     }
   };
-  //useStyles
-  const classes = useStyles();
 
-  // useEffect(() => {}, []);
+  //useStyles
+
+  //   else {
+  //     setNotify({
+  //       isOpen: true,
+  //       message: "SERVER ERROR - please contact your sytem admin !",
+  //       type: "error",
+  //     });
+  //   }
+  const classes = useStyles();
 
   return (
     <div>
@@ -123,58 +134,42 @@ export default function login(props) {
           direction="column"
           justify="space-between"
         >
-          <div />
+          <Alert variant="outlined" severity="info">
+            <div />
+            Its your first login to verify your account please create new
+            password!
+          </Alert>
+          <div item>
+            <Avatar sx={{ m: 1 }}>
+              <VpnKeyTwoTone />
+            </Avatar>
+          </div>
           <div className={classes.inputContainer}>
-            <Grid container justify="center">
-              <Avatar sx={{ m: 1, bgcolor: "purple" }}>
-                <LockOutlined />
-              </Avatar>
-            </Grid>
             <Typography
               component="h1"
               variant="h5"
               style={{ textAlign: "center", marginTop: "5px" }}
-            >
-              Sign in
-            </Typography>
+            ></Typography>
             <Form onSubmit={handleSubmit} history={props.history}>
-              <Controls.Input
-                autoFocus
-                name="email"
-                label="Email"
-                variant="standard"
-                values={values.email}
-                onChange={handleOnChange}
-                error={errors.email}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email />
-                    </InputAdornment>
-                  ),
-                }}
-              />
               <Controls.Input
                 name="password"
                 label="Password"
                 type="password"
-                variant="standard"
+                variant="outlined"
                 values={values.password}
                 onChange={handleOnChange}
                 error={errors.password}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment>
-                      <Lock />
-                    </InputAdornment>
-                  ),
-                }}
               />
-              <Controls.Button
-                text="login"
-                type="submit"
-                disabled={(validate && !values.email) || !values.password}
-              />
+              {/* <Controls.Input
+                name="password"
+                label="Confirm password"
+                type="password"
+                variant="outlined"
+                values={values.password}
+                onChange={handleOnChange}
+                error={errors.password}
+              /> */}
+              <Controls.Button text="change password" type="submit" />
               <div style={{ height: 20, marginLeft: "5px" }}>
                 {/* <Button color="default" variant="contained">
                   Rays Microfinance Instituition
