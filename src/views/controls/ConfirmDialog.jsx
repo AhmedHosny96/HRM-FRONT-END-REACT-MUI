@@ -6,6 +6,7 @@ import {
   DialogTitle,
   Typography,
   Slide,
+  CircularProgress,
 } from "@material-ui/core";
 import Controls from "../../views/controls/controls";
 import { makeStyles } from "@material-ui/core/styles";
@@ -26,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ConfirmDialog(props) {
   const classes = useStyles();
-  const { confirmDialog, setConfirmDialog } = props;
+  const { confirmDialog, setConfirmDialog, loading, setIsLoading } = props;
 
   return (
     <Dialog
@@ -51,6 +52,7 @@ export default function ConfirmDialog(props) {
           size="small"
           color="primary"
           onClick={() => confirmDialog.onConfirm()}
+          // endIcon={<CircularProgress size={20} color="white" />}
         />
       </DialogActions>
     </Dialog>

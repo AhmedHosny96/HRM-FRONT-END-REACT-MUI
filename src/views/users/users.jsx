@@ -132,7 +132,7 @@ export default function Users() {
     // notify sucess
     setNotify({
       isOpen: true,
-      message: ` One-time password  is sent to ${user.email}`,
+      message: ` One-time password  is sent to - ${user.email}`,
       type: "success",
     });
     // refresh the table

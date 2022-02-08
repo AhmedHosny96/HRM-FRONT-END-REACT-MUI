@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import jwtDecode from "jwt-decode";
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import Admin from "layouts/Admin.js";
 import RTL from "layouts/RTL.js";
 import Login from "./views/pages/login.jsx";

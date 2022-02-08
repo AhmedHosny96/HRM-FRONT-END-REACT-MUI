@@ -62,6 +62,7 @@ export default function employeeForm(props) {
     setErrors({
       ...temp,
     });
+    handleOnChange;
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 
@@ -104,13 +105,7 @@ export default function employeeForm(props) {
       try {
         await postData(values);
         console.log(values);
-      } catch (error) {
-        setNotify({
-          isOpen: true,
-          message: error.response.data,
-          type: "warning",
-        });
-      }
+      } catch (error) {}
     }
   };
 

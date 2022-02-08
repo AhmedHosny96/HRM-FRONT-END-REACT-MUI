@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Avatar, Typography } from "@material-ui/core";
+import { Grid, Avatar, Typography, CircularProgress } from "@material-ui/core";
 import { VpnKeyTwoTone } from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -69,6 +69,7 @@ export default function ChangePassword(props) {
     true,
     validate
   );
+  const [isFetching, setIsFetching] = useState(false);
   const [notify, setNotify] = useState({
     isOpen: false,
     message: "",
@@ -83,16 +84,13 @@ export default function ChangePassword(props) {
 
     try {
       const userId = props.match.params.id;
-      //
       const password = { ...values };
       await auth.changePassword(userId, password);
-
       // get the token
-
       const token = localStorage.getItem("token");
-
-      console.log(token);
       auth.loginWithJwt(token);
+
+      setIsFetching(true);
 
       setNotify({
         isOpen: true,
@@ -169,7 +167,17 @@ export default function ChangePassword(props) {
                 onChange={handleOnChange}
                 error={errors.password}
               /> */}
-              <Controls.Button text="change password" type="submit" />
+
+              {isFetching ? (
+                <Controls.Button
+                  text={<CircularProgress size={20} />}
+                  disabled={isFetching}
+                  type="submit"
+                />
+              ) : (
+                <Controls.Button text="change password" type="submit" />
+              )}
+
               <div style={{ height: 20, marginLeft: "5px" }}>
                 {/* <Button color="default" variant="contained">
                   Rays Microfinance Instituition

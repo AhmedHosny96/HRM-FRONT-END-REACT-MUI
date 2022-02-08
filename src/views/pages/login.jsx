@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Grid, InputAdornment, Avatar, Typography } from "@material-ui/core";
+import {
+  Grid,
+  InputAdornment,
+  Avatar,
+  Typography,
+  CircularProgress,
+} from "@material-ui/core";
 import { LockOutlined } from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -69,7 +75,8 @@ export default function login(props) {
     true,
     validate
   );
-  const [currentUser, setCurrentUser] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
+
   const [notify, setNotify] = useState({
     isOpen: false,
     message: "",
@@ -81,14 +88,14 @@ export default function login(props) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsFetching(true);
 
     try {
       //
       const { email, password } = { ...values };
       await auth.loginUser(email, password);
-
+      setIsFetching(true);
       const user = auth.getCurrentUser();
-      console.log(user._id);
       if (user.firstLogin == 1) {
         window.location = `/change-password/${user._id}`;
       } else {
@@ -97,6 +104,7 @@ export default function login(props) {
 
       // if (currentUser.firstLogin === 0) window.location = "/admin/dashboard";
     } catch (ex) {
+      setIsFetching(false);
       setNotify({
         isOpen: true,
         message: ex.response.data,
@@ -170,11 +178,20 @@ export default function login(props) {
                   ),
                 }}
               />
-              <Controls.Button
-                text="login"
-                type="submit"
-                disabled={(validate && !values.email) || !values.password}
-              />
+
+              {isFetching ? (
+                <Controls.Button
+                  text={<CircularProgress size={20} disableShrink />}
+                  type="submit"
+                  disabled={isFetching}
+                />
+              ) : (
+                <Controls.Button
+                  text="login"
+                  type="submit"
+                  disabled={(validate && !values.email) || !values.password}
+                />
+              )}
               <div style={{ height: 20, marginLeft: "5px" }}>
                 {/* <Button color="default" variant="contained">
                   Rays Microfinance Instituition

@@ -17,7 +17,7 @@ export default function useInput(props) {
       onChange={onChange}
       {...(error && { error: true, helperText: error })}
       {...rest}
-      // required
+      required
     />
   );
 }

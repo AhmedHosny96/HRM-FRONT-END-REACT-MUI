@@ -23,6 +23,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import "assets/css/material-dashboard-react.css?v=1.10.0";
+import { ThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
 ReactDOM.render(
   <React.Fragment>

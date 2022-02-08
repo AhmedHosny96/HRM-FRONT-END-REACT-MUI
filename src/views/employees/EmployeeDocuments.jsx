@@ -5,17 +5,17 @@ import {
   TableRow,
   TableCell,
   Toolbar,
-  LinearProgress,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
+import "antd/dist/antd.css";
 
 import EmployeeDocumentForm from "./EmployeeDocumentForm";
 
 import Controls from "../controls/controls";
-import { EditOutlined, DeleteOutline } from "@material-ui/icons/";
+import { Edit, Delete, CloudDownload } from "@material-ui/icons/";
+import { getStorage, ref, deleteObject } from "firebase/storage";
 import { Empty } from "antd";
-import "antd/dist/antd.css";
 import Popup from "../controls/Popup";
 import ConfirmDialog from "../controls/ConfirmDialog";
 import {
@@ -25,6 +25,7 @@ import {
 } from "../../services/documentService";
 import Notifications from "views/controls/Notifications";
 import Spin from "./../common/useSpin";
+import app from "./../common/firebase";
 
 const useStyles = makeStyles((theme) => ({
   pageContent: {
@@ -90,17 +91,24 @@ export default function EmployeeDocuments() {
 
   // posting and update data into db for branchesform
   const postData = async (document) => {
-    const data = { ...document };
-    await saveDocument(data);
-    setOpenPopup(false);
+    try {
+      const data = { ...document };
+      await saveDocument(data);
+      setOpenPopup(false);
 
-    setNotify({
-      isOpen: true,
-      message: "Successfull !",
-      type: "success",
-    });
-
-    fetchData();
+      setNotify({
+        isOpen: true,
+        message: "Successfull !",
+        type: "success",
+      });
+      fetchData();
+    } catch (ex) {
+      setNotify({
+        isOpen: true,
+        message: ex.response.data,
+        type: "error",
+      });
+    }
   };
 
   //handling search
@@ -114,9 +122,9 @@ export default function EmployeeDocuments() {
         //search input == ""
         if (target.value == "") return items;
         //do the filter
-        else
+        else if (target.value)
           return items.filter((item) =>
-            item.name.toLowerCase().includes(target.value)
+            item.employee.fullName.toLowerCase().includes(target.value)
           );
       },
     });
@@ -125,18 +133,29 @@ export default function EmployeeDocuments() {
   //handle delete
 
   const handleDelete = async (document) => {
+    setIsFetching(true);
     setConfirmDialog({
       ...confirmDialog,
       isOpen: false,
     });
     records.filter((b) => b._id != document._id);
-    await deleteDocument(document._id);
 
-    setNotify({
-      isOpen: true,
-      message: "Deleted Successfully!",
-      type: "error",
-    });
+    const storage = getStorage(app);
+    //image reference storage: firebase , url : mongodb
+    const imageRef = ref(storage, document.attachment);
+    // delete
+    await deleteObject(imageRef)
+      .then(() => {
+        deleteDocument(document._id);
+        setNotify({
+          isOpen: true,
+          message: "Deleted Successfully!",
+          type: "error",
+        });
+      })
+      .catch((err) => {
+        alert("error occured" + err);
+      });
     fetchData();
   };
 
@@ -198,10 +217,18 @@ export default function EmployeeDocuments() {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
+                      window.open(record.attachment, "_blank");
+                    }}
+                  >
+                    <CloudDownload />
+                  </Controls.ActionButton>
+                  <Controls.ActionButton
+                    color="primary"
+                    onClick={() => {
                       openInPopup(record);
                     }}
                   >
-                    <EditOutlined />
+                    <Edit />
                   </Controls.ActionButton>
                   <Controls.ActionButton
                     color="secondary"
@@ -214,7 +241,7 @@ export default function EmployeeDocuments() {
                       })
                     }
                   >
-                    <DeleteOutline />
+                    <Delete />
                   </Controls.ActionButton>
                 </TableCell>
               </TableRow>
@@ -223,12 +250,14 @@ export default function EmployeeDocuments() {
         </TableContainer>
         {isFetching && <Spin />}
 
-        {count === 0 && !isFetching && <Empty description="No data found" />}
+        {count === 0 && !isFetching && (
+          <Empty description="No documents found" />
+        )}
 
         <Pagination />
       </Paper>
       <Popup
-        title="Upload employee documents"
+        title="Employee document form"
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >

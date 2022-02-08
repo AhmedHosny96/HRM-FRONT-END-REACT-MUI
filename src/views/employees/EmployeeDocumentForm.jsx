@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { Button, CircularProgress, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
 import { getEmployees } from "./../../services/employeeService";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-
 import {
   getDownloadURL,
   getStorage,
@@ -21,16 +21,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const initialValues = {
-  // employeeId: "",
-  // documentType: "",
-  // details: "",
+  employeeId: "",
+  documentType: "",
+  details: "",
   attachment: "",
 };
 export default function EmployeeDocumentForm(props) {
   const classes = useStyles();
 
+  const [isFetching, setIsFetching] = useState(false);
   const [attachment, setAttachment] = useState(null);
-  const [downloadURL, setDownloadURL] = useState();
+  const [preview, setPreview] = useState("");
 
   const { postData, recordForEdit, setNotify } = props;
 
@@ -51,13 +52,15 @@ export default function EmployeeDocumentForm(props) {
 
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
-  const { values, setValues, errors, setErrors } = useForm(
+  const { values, setValues, errors, setErrors, handleOnChange } = useForm(
     initialValues,
     true,
     validate
   );
   const [employee, setEmployee] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
+  const [imageUrl, setImageUrl] = useState("");
   //populating data into form
 
   const populateEmployees = async () => {
@@ -68,18 +71,23 @@ export default function EmployeeDocumentForm(props) {
   useEffect(() => {
     //populate if there are records
 
-    // populateEmployees();
+    populateEmployees();
 
-    if (recordForEdit != null)
+    if (recordForEdit != null) {
       setValues({
         ...recordForEdit,
-        employeeId: recordForEdit.employee.fullName,
       });
+      // populate auto select value
+      setInputValue(recordForEdit.employee.fullName);
+      // preview the document
+      setPreview(recordForEdit.attachment);
+    }
   }, [recordForEdit]);
 
-  const handleOnChange = (files) => {
-    // console.log(files[0]);
+  const handleChange = (files) => {
     setAttachment(files[0]);
+    //preview the image before upload
+    setPreview(URL.createObjectURL(files[0]));
   };
 
   //saving data to db
@@ -87,59 +95,94 @@ export default function EmployeeDocumentForm(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setPreview(null);
+
+    const fileName = new Date().getTime() + attachment.name;
+    const storage = getStorage(app);
     try {
-      const fileName = new Date().getTime() + attachment.name;
-      const storage = getStorage(app);
       const storageRef = ref(storage, `documents/${fileName}`);
       const uploadTask = uploadBytesResumable(storageRef, attachment);
       uploadTask.on(
         "state_changed",
-        (snapshot) => {},
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setIsFetching(true);
+
+          console.log("Uploading " + progress + " % done ...");
+        },
         () => {},
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadLink) => {
-            setDownloadURL(downloadLink);
-            const img = document.getElementById("img-preview");
-            img.setAttribute("src", downloadLink);
+            // setImageUrl(downloadLink);
+            setAttachment(downloadLink);
+            const fields = { ...values, attachment: downloadLink };
+            postData(fields);
+
+            setIsFetching(false);
           });
         }
       );
-      alert("success");
-    } catch (error) {
-      alert("error occured" + error);
+    } catch (ex) {
+      setNotify({
+        isOpen: true,
+        message: ex,
+        type: "error",
+      });
     }
-  };
-
-  const showImage = () => {
-    // const storage = getStorage(app);
-    // getDownloadURL(ref(storage, `documents/${attachment.name}`)).then((url) => {
-    //   const img = document.getElementById("img-preview");
-    //   img.setAttribute("src", url);
-    // });
   };
 
   return (
     <div className={classes.root}>
+      {isFetching && <LinearProgress />}
+      <br />
       <Form onSubmit={handleSubmit}>
-        {/* <Autocomplete
-          disablePortal
-          id="employeeId"
-          options={employee}
-          size="small"
-          sx={{ width: 300 }}
-          getOptionLabel={(employee) => employee.fullName}
-          renderInput={(params) => (
-            <Controls.Input
-              {...params}
-              label="Employee"
-              value={values.employeeId}
-              onChange={handleOnChange}
-            />
-          )}
-          onChange={(event, selectedValue) => {
-            setValues({ employeeId: selectedValue._id });
-          }}
-        />
+        {recordForEdit && (
+          <Autocomplete
+            disablePortal
+            options={employee}
+            size="small"
+            inputValue={inputValue}
+            sx={{ width: 300 }}
+            getOptionLabel={(employee) => employee.fullName}
+            renderInput={(params) => (
+              <Controls.Input
+                {...params}
+                id="employeeId"
+                label="Employee"
+                name="employeeId"
+                value={values.employeeId}
+                onChange={handleOnChange}
+              />
+            )}
+            onChange={(event, selectedValue) => {
+              setValues({ ...values, employeeId: selectedValue._id });
+            }}
+          />
+        )}
+        {!recordForEdit && (
+          <Autocomplete
+            disablePortal
+            options={employee}
+            size="small"
+            noOptionsText="No employee found"
+            sx={{ width: 300 }}
+            getOptionLabel={(employee) => employee.fullName}
+            renderInput={(params) => (
+              <Controls.Input
+                {...params}
+                id="employeeId"
+                label="Employee"
+                name="employeeId"
+                value={values.employeeId}
+                onChange={handleOnChange}
+              />
+            )}
+            onChange={(event, selectedValue) => {
+              setValues({ ...values, employeeId: selectedValue._id });
+            }}
+          />
+        )}
         <Controls.Input
           name="documentType"
           label="Document Type"
@@ -154,17 +197,33 @@ export default function EmployeeDocumentForm(props) {
           value={values.details}
           onChange={handleOnChange}
           error={errors.details}
-        /> */}
+          multiline
+          rows={2}
+          maxRows={4}
+        />
 
         <Controls.Input
           name="attachment"
           type="file"
-          onChange={(e) => handleOnChange(e.target.files)}
+          filena
+          onChange={(e) => handleChange(e.target.files)}
           error={errors.attachment}
+          required="false"
         />
-        <Controls.Button text="Submit" type="submit" />
-        <Controls.Button text="download image" onClick={showImage} />
-        <img id="img-preview" />
+
+        {!isFetching && (
+          <Controls.Button text="Submit" type="submit"></Controls.Button>
+        )}
+        {isFetching && (
+          <Controls.Button
+            text="Submit"
+            type="submit"
+            endIcon={<CircularProgress size={20} />}
+            disabled={isFetching}
+          ></Controls.Button>
+        )}
+        <br />
+        <img id="img-preview" src={preview} />
       </Form>
     </div>
   );
