@@ -1,25 +1,27 @@
 import http from "./httpService";
 
-const api = "http://localhost:5000/api/auth/create";
+const API_URL = process.env.REACT_APP_API_URL;
 
+//get user by id
 export function getUser(id) {
-  return http.get(api + "/" + id);
+  return http.get(API_URL + "auth/create/" + id);
 }
+
+//signing up users
 export function saveUser(user) {
   if (user._id) {
     const { body } = { ...user };
     delete body._id;
-    return http.put(api + "/" + user._id, body);
+    return http.put(API_URL + "auth/create/" + user._id, body);
   }
-
-  // return http.post(api + "/" + id + "/" + token, user) || http.post(api, user);
-  return http.post(api, user);
+  // return http.post(API_URL + "/" + id + "/" + token, user) || http.post(API_URL, user);
+  return http.post(API_URL + "auth/create", user);
 }
-const URL = "http://localhost:5000/api/users";
+//fetching all users
 
 export function getUsers() {
-  return http.get(URL);
+  return http.get(API_URL + "users");
 }
 export function deleteUser(id) {
-  return http.delete(URL + "/" + id);
+  return http.delete(API_URL + "users/" + id);
 }

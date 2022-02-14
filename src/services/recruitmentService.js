@@ -1,12 +1,13 @@
 import http from "./httpService";
-const api = "http://localhost:5000/api/recruitments/";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 export function getRecruitments() {
-  return http.get(api);
+  return http.get(API_URL + "recruitments");
 }
 
 export function getRecruitment(id) {
-  return http.get(api + "/" + id);
+  return http.get(API_URL + "recruitments/" + id);
 }
 
 export function saveRecruitment(recruitment) {
@@ -14,11 +15,11 @@ export function saveRecruitment(recruitment) {
     const body = { ...recruitment };
     delete body._id;
     //update
-    return http.put(api + "/" + recruitment._id, body);
+    return http.put(API_URL + "recruitments/" + recruitment._id, body);
   }
-  return http.post(api, recruitment);
+  return http.post(API_URL + "recruitments", recruitment);
 }
 
 export function deleteRecruitment(id) {
-  return http.delete(api + "/" + id);
+  return http.delete(API_URL + "recruitments/" + id);
 }

@@ -1,8 +1,16 @@
-
-import React from 'react'
+import React from "react";
 import { Box, Typography, Tabs, Tab } from "@material-ui/core";
+import PropTypes from "prop-types";
+import { makeStyles } from "@material-ui/core/styles";
 
-
+const useStyles = makeStyles((theme) => ({
+  tab: {
+    marginTop: theme.spacing(-7),
+  },
+  tabText: {
+    textTransform: "none",
+  },
+}));
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -23,54 +31,36 @@ function TabPanel(props) {
   );
 }
 
+export default function UseTabs({ tabs }) {
+  const classes = useStyles();
+  const [value, setValue] = React.useState(0);
 
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
-export default function useTabs() {
-    
-const [value, setValue] = React.useState(0);
-
-
-const handleChange = (event, newValue) => {
+  const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-return (
+  return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
+          className={classes.tab}
           value={value}
           onChange={handleChange}
           aria-label="basic tabs example"
-          textColor="black"
-          aria-label="secondary tabs example"
+          textColor="primary"
+          indicatorColor="primary"
+          wrapped
         >
-          <Tab label="Item One" {...a11yProps(0)} />
-          <Tab label="Item Two" {...a11yProps(1)} />
-          <Tab label="Item Three" {...a11yProps(2)} />
+          {tabs.map(({ label }, i) => (
+            <Tab label={label} key={i} className={classes.tabText} />
+          ))}
         </Tabs>
       </Box>
-      <TabPanel value={value} index={0}>
-        <Jobs />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Branches />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        Item Three
-      </TabPanel>
+      {tabs.map(({ Component }, i) => (
+        <TabPanel value={value} index={i} key={i}>
+          {Component}
+        </TabPanel>
+      ))}
     </Box>
-    )
+  );
 }
-
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};

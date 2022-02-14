@@ -5,6 +5,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  Badge,
 } from "@material-ui/core";
 import EmployeeForm from "./employeeForm";
 import { makeStyles } from "@material-ui/core/styles";
@@ -16,6 +17,7 @@ import {
   deleteEmployee,
 } from "../../services/employeeService";
 import Controls from "../controls/controls";
+import UseAvatar from "views/common/useAvatar";
 import { EditOutlined, DeleteOutlined } from "@material-ui/icons/";
 import Popup from "../controls/Popup";
 import Notifications from "../controls/Notifications";
@@ -40,15 +42,15 @@ const useStyles = makeStyles((theme) => ({
 //column header configurations
 
 const headCells = [
+  { id: "avatar", label: "" },
   { id: "employeeId", label: "ID" },
 
   { id: "fullName", label: "Name" },
-  { id: "email", label: "Email" },
-  { id: "phoneNumber", label: "Phone" },
-  { id: "jobId", label: "Job Title" },
+  // { id: "email", label: "Email" },
   { id: "branchId", label: "Branch" },
+  { id: "jobId", label: "Job Title" },
+  { id: "phoneNumber", label: "Phone" },
   { id: "status", label: "Status" },
-
   { id: "action", label: "Action" },
 ];
 
@@ -187,14 +189,22 @@ export default function employees({ user }) {
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{record.employeeId}</TableCell>
+                <TableCell>
+                  <UseAvatar>
+                    {record.fullName.charAt(0).toUpperCase()}
+                    {record.fullName.toUpperCase().match(/(?<= )./)}
+                  </UseAvatar>
+                </TableCell>
+                <TableCell> {record.employeeId}</TableCell>
                 <TableCell>{record.fullName}</TableCell>
-                <TableCell>{record.email}</TableCell>
+                {/* <TableCell>{record.email}</TableCell> */}
+                <TableCell>{record.branch.name}</TableCell>
+                <TableCell>{record.job.name}</TableCell>
                 <TableCell>{record.phoneNumber}</TableCell>
 
-                <TableCell>{record.job.name}</TableCell>
-                <TableCell>{record.branch.name}</TableCell>
-                <TableCell>{record.status}</TableCell>
+                <TableCell style={{ color: "darkblue" }}>
+                  {record.status}
+                </TableCell>
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
@@ -204,20 +214,18 @@ export default function employees({ user }) {
                   >
                     <EditOutlined />
                   </Controls.ActionButton>
-                  {user && (
-                    <Controls.ActionButton
-                      color="secondary"
-                      onClick={() =>
-                        setConfirmDialog({
-                          isOpen: true,
-                          title: `Are you sure you want to delete ${record.fullName} ?`,
-                          onConfirm: () => handleDelete(record),
-                        })
-                      }
-                    >
-                      <DeleteOutlined />
-                    </Controls.ActionButton>
-                  )}
+                  <Controls.ActionButton
+                    color="secondary"
+                    onClick={() =>
+                      setConfirmDialog({
+                        isOpen: true,
+                        title: `Are you sure you want to delete ${record.fullName} ?`,
+                        onConfirm: () => handleDelete(record),
+                      })
+                    }
+                  >
+                    <DeleteOutlined />
+                  </Controls.ActionButton>
                 </TableCell>
               </TableRow>
             ))}

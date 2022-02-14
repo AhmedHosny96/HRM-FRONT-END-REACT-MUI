@@ -13,7 +13,11 @@ import "antd/dist/antd.css";
 import EmployeeDocumentForm from "./EmployeeDocumentForm";
 
 import Controls from "../controls/controls";
-import { Edit, Delete, CloudDownload } from "@material-ui/icons/";
+import {
+  EditOutlined,
+  DeleteOutline,
+  CloudDownloadOutlined,
+} from "@material-ui/icons/";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 import { Empty } from "antd";
 import Popup from "../controls/Popup";
@@ -25,7 +29,7 @@ import {
 } from "../../services/documentService";
 import Notifications from "views/controls/Notifications";
 import Spin from "./../common/useSpin";
-import app from "./../common/firebase";
+import app from "./../../services/firebase";
 
 const useStyles = makeStyles((theme) => ({
   pageContent: {
@@ -212,7 +216,6 @@ export default function EmployeeDocuments() {
                 <TableCell>{record.employee.branch.name}</TableCell>
                 <TableCell>{record.documentType}</TableCell>
                 <TableCell>{record.details}</TableCell>
-
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
@@ -220,7 +223,7 @@ export default function EmployeeDocuments() {
                       window.open(record.attachment, "_blank");
                     }}
                   >
-                    <CloudDownload />
+                    <CloudDownloadOutlined />
                   </Controls.ActionButton>
                   <Controls.ActionButton
                     color="primary"
@@ -228,7 +231,7 @@ export default function EmployeeDocuments() {
                       openInPopup(record);
                     }}
                   >
-                    <Edit />
+                    <EditOutlined />
                   </Controls.ActionButton>
                   <Controls.ActionButton
                     color="secondary"
@@ -241,7 +244,7 @@ export default function EmployeeDocuments() {
                       })
                     }
                   >
-                    <Delete />
+                    <DeleteOutline />
                   </Controls.ActionButton>
                 </TableCell>
               </TableRow>

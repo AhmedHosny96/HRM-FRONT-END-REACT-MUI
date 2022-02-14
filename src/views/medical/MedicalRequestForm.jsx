@@ -58,6 +58,7 @@ export default function MedicalRequestForm(props) {
     true,
     validate
   );
+  const [inputValue, setInputValue] = useState("");
   const [employee, setEmployee] = useState("");
   const [medical, setMedical] = useState([]);
 
@@ -82,9 +83,9 @@ export default function MedicalRequestForm(props) {
     if (recordForEdit != null)
       setValues({
         ...recordForEdit,
-        employeeId: recordForEdit.employee._id,
         medicalExpenseId: recordForEdit.medicalExpense._id,
       });
+    setInputValue(recordForEdit.employee.fullName);
   }, [recordForEdit]);
 
   //saving data to db
@@ -120,6 +121,7 @@ export default function MedicalRequestForm(props) {
           options={employee}
           size="small"
           sx={{ width: 300 }}
+          inputValue={inputValue}
           getOptionLabel={(employee) => employee.fullName}
           renderInput={(params) => (
             <Controls.Input

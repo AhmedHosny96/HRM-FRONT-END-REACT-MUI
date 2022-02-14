@@ -104,7 +104,7 @@ export function useTable(records, headCells, filterFn) {
 
   const handlePerPageChange = (event) => {
     //convert the event.target.value to integer
-    setRowsPerPage(parseInt(event.target.value, 5));
+    setRowsPerPage(parseInt(event.target.value, 10));
     //reset the current page to zero
     setPage(0);
   };

@@ -9,7 +9,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { useTable } from "../common/useTable";
 import { Empty } from "antd";
-
+import UseAvatar from "views/common/useAvatar";
 import JobForm from "./jobForm";
 
 import Controls from "../controls/controls";
@@ -19,6 +19,8 @@ import ConfirmDialog from "../controls/ConfirmDialog";
 import { saveJob, getJobs, deleteJob } from "../../services/jobService";
 import Notifications from "views/controls/Notifications";
 import Spin from "../common/useSpin";
+import Tab from "../common/useTabs";
+
 const useStyles = makeStyles((theme) => ({
   pageContent: {
     margin: theme.spacing(0),
@@ -41,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
 //table header column configurations
 
 const headCells = [
-  { id: "code", label: "Code" },
+  { id: "code", label: "Job title code" },
   { id: "name", label: "Job title" },
   { id: "department", label: "Department" },
 
@@ -182,7 +184,9 @@ export default function Jobs() {
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{record.code}</TableCell>
+                <TableCell>
+                  <UseAvatar>{record.code.toUpperCase()}</UseAvatar>
+                </TableCell>
                 <TableCell>{record.name}</TableCell>
                 <TableCell>{record.department}</TableCell>
                 <TableCell>

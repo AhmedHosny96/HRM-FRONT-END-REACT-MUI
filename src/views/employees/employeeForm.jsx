@@ -62,7 +62,6 @@ export default function employeeForm(props) {
     setErrors({
       ...temp,
     });
-    handleOnChange;
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 

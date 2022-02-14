@@ -10,7 +10,7 @@ import { useForm, Form } from "../common/useForm";
 import auth from "../../services/authService";
 import Notifications from "../../views/controls/Notifications";
 import Alert from "@material-ui/lab/Alert";
-
+import * as Yup from "yup";
 const useStyles = makeStyles((theme) => ({
   container: {
     minHeight: "100vh",
@@ -54,15 +54,25 @@ export default function ChangePassword(props) {
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
 
-    if ("password" in fieldValues && "confirmPassowrd" in fieldValues)
-      temp.password != temp.confirmPassword ? "" : "Password doesnt match";
+    if ("password" in fieldValues) {
+      temp.password =
+        fieldValues.password.length < 8
+          ? "password should be minimum 8 characters"
+          : "";
+    }
 
-    setErrors({
-      ...temp,
-    });
+    if ("confirmPassword" in fieldValues) {
+      if (fieldValues.confirmPassword !== values.password) {
+        temp.confirmPassword = "Password doesn't match";
+      } else {
+        temp.confirmPassword = "";
+      }
+    }
 
+    setErrors({ ...temp });
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
+
   // useForm definitions
   const { values, handleOnChange, errors, setErrors } = useForm(
     initialValues,
@@ -75,35 +85,32 @@ export default function ChangePassword(props) {
     message: "",
     type: "",
   });
-  //check if user signed Up
-
-  // handling submit
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const userId = props.match.params.id;
-      const password = { ...values };
-      await auth.changePassword(userId, password);
-      // get the token
-      const token = localStorage.getItem("token");
-      auth.loginWithJwt(token);
+    if (validate()) {
+      try {
+        const token = props.match.params.token;
+        const password = { ...values };
+        await auth.changePassword(token, password);
+        //
+        setIsFetching(true);
+        window.location = "/admin/dashboard";
 
-      setIsFetching(true);
-
-      setNotify({
-        isOpen: true,
-        message: "User verified successfully",
-        type: "success",
-      });
-      // login with jwt
-    } catch (ex) {
-      //   setNotify({
-      //     isOpen: true,
-      //     message: ex.response.data,
-      //     type: "error",
-      //   });
+        setNotify({
+          isOpen: true,
+          message: "User verified successfully",
+          type: "success",
+        });
+        // login with jwt
+      } catch (ex) {
+        //   setNotify({
+        //     isOpen: true,
+        //     message: ex.response.data,
+        //     type: "error",
+        //   });
+      }
     }
   };
 
@@ -116,6 +123,7 @@ export default function ChangePassword(props) {
   //       type: "error",
   //     });
   //   }
+
   const classes = useStyles();
 
   return (
@@ -150,6 +158,7 @@ export default function ChangePassword(props) {
             ></Typography>
             <Form onSubmit={handleSubmit} history={props.history}>
               <Controls.Input
+                autoFocus
                 name="password"
                 label="Password"
                 type="password"
@@ -158,15 +167,15 @@ export default function ChangePassword(props) {
                 onChange={handleOnChange}
                 error={errors.password}
               />
-              {/* <Controls.Input
-                name="password"
+              <Controls.Input
+                name="confirmPassword"
                 label="Confirm password"
                 type="password"
                 variant="outlined"
-                values={values.password}
+                values={values.confirmPassword}
                 onChange={handleOnChange}
-                error={errors.password}
-              /> */}
+                error={errors.confirmPassword}
+              />
 
               {isFetching ? (
                 <Controls.Button

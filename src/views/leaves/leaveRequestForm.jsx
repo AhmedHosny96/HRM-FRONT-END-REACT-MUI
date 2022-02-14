@@ -104,7 +104,7 @@ export default function LeaveRequestForm(props) {
   return (
     <div className={classes.root}>
       <Form onSubmit={handleSubmit}>
-        <Autocomplete
+        {/* <Autocomplete
           disablePortal
           id="employeeId"
           options={employee}
@@ -122,8 +122,8 @@ export default function LeaveRequestForm(props) {
           onChange={(event, selectedValue) => {
             setValues({ employeeId: selectedValue._id });
           }}
-        />
-
+        /> */}
+        {/* 
         <Autocomplete
           disablePortal
           id="leaveId"
@@ -142,8 +142,8 @@ export default function LeaveRequestForm(props) {
           onChange={(event, selectedValue) => {
             setValues({ leaveId: selectedValue._id }, console.log(leaveId));
           }}
-        />
-        {/* <Controls.Select
+        /> */}
+        <Controls.Select
           name="leaveId"
           label="Leave"
           value={values.leaveId}
@@ -151,7 +151,7 @@ export default function LeaveRequestForm(props) {
           onChange={handleOnChange}
           error={errors.leaveId}
           required
-        /> */}
+        />
         <Controls.Date
           name="startDate"
           label="Start date"

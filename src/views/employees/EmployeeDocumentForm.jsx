@@ -11,7 +11,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import app from "./../common/firebase";
+import app from "./../../services/firebase";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,6 +32,8 @@ export default function EmployeeDocumentForm(props) {
   const [isFetching, setIsFetching] = useState(false);
   const [attachment, setAttachment] = useState(null);
   const [preview, setPreview] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [buffer, setBuffer] = useState(10);
 
   const { postData, recordForEdit, setNotify } = props;
 
@@ -60,7 +62,6 @@ export default function EmployeeDocumentForm(props) {
   const [employee, setEmployee] = useState("");
   const [inputValue, setInputValue] = useState("");
 
-  const [imageUrl, setImageUrl] = useState("");
   //populating data into form
 
   const populateEmployees = async () => {
@@ -84,7 +85,7 @@ export default function EmployeeDocumentForm(props) {
     }
   }, [recordForEdit]);
 
-  const handleChange = (files) => {
+  const handleAttachmentChange = (files) => {
     setAttachment(files[0]);
     //preview the image before upload
     setPreview(URL.createObjectURL(files[0]));
@@ -100,8 +101,20 @@ export default function EmployeeDocumentForm(props) {
     const fileName = new Date().getTime() + attachment.name;
     const storage = getStorage(app);
     try {
+      // get employee name
+
+      //TODO: get employee name
+      const metadata = {
+        customMetadata: {
+          employeeId: values.employeeId,
+          documentType: values.documentType,
+          details: values.details,
+        },
+      };
+
+      console.log(metadata);
       const storageRef = ref(storage, `documents/${fileName}`);
-      const uploadTask = uploadBytesResumable(storageRef, attachment);
+      const uploadTask = uploadBytesResumable(storageRef, attachment, metadata);
       uploadTask.on(
         "state_changed",
         (snapshot) => {
@@ -110,6 +123,8 @@ export default function EmployeeDocumentForm(props) {
           setIsFetching(true);
 
           console.log("Uploading " + progress + " % done ...");
+
+          setProgress(progress);
         },
         () => {},
         () => {
@@ -134,10 +149,16 @@ export default function EmployeeDocumentForm(props) {
 
   return (
     <div className={classes.root}>
-      {isFetching && <LinearProgress />}
+      {isFetching && (
+        <LinearProgress
+          variant="buffer"
+          value={progress}
+          valueBuffer={buffer}
+        />
+      )}
       <br />
       <Form onSubmit={handleSubmit}>
-        {recordForEdit && (
+        {recordForEdit ? (
           <Autocomplete
             disablePortal
             options={employee}
@@ -159,8 +180,7 @@ export default function EmployeeDocumentForm(props) {
               setValues({ ...values, employeeId: selectedValue._id });
             }}
           />
-        )}
-        {!recordForEdit && (
+        ) : (
           <Autocomplete
             disablePortal
             options={employee}
@@ -179,7 +199,10 @@ export default function EmployeeDocumentForm(props) {
               />
             )}
             onChange={(event, selectedValue) => {
-              setValues({ ...values, employeeId: selectedValue._id });
+              setValues({
+                ...values,
+                employeeId: selectedValue._id,
+              });
             }}
           />
         )}
@@ -206,7 +229,7 @@ export default function EmployeeDocumentForm(props) {
           name="attachment"
           type="file"
           filena
-          onChange={(e) => handleChange(e.target.files)}
+          onChange={(e) => handleAttachmentChange(e.target.files)}
           error={errors.attachment}
           required="false"
         />

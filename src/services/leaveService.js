@@ -1,12 +1,13 @@
 import http from "./httpService";
-const api = "http://localhost:5000/api/leaves";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 export function getLeaves() {
-  return http.get(api);
+  return http.get(API_URL + "leaves");
 }
 
 export function getLeave(id) {
-  return http.get(api + "/" + id);
+  return http.get(API_URL + "leaves/" + id);
 }
 
 export function saveLeave(leaves) {
@@ -14,23 +15,21 @@ export function saveLeave(leaves) {
     const body = { ...leaves };
     delete body._id;
     //update
-    return http.put(api + "/" + leaves._id, body);
+    return http.put(API_URL + "leaves/" + leaves._id, body);
   }
-  return http.post(api, leaves);
+  return http.post(API_URL + "leaves", leaves);
 }
 
 export function deleteLeave(id) {
-  return http.delete(api + "/" + id);
+  return http.delete(API_URL + "leaves/" + id);
 }
 
-const URL = "http://localhost:5000/api/employee/leave";
-
 export function getLeaveRequests() {
-  return http.get(URL);
+  return http.get(API_URL + "employee/leave");
 }
 
 export function getLeaveRequest(id) {
-  return http.get(URL + "/" + id);
+  return http.get(API_URL + "employee/leave/" + id);
 }
 
 export function saveLeaveRequest(leaveRequest) {
@@ -38,10 +37,10 @@ export function saveLeaveRequest(leaveRequest) {
     const body = { ...leaveRequest };
     delete body._id;
     //update
-    return http.put(URL + "/" + leaveRequest._id, body);
+    return http.put(API_URL + "employee/leave/" + leaveRequest._id, body);
   }
-  return http.post(URL, leaveRequest);
+  return http.post(API_URL + "employee/leave", leaveRequest);
 }
 export function deleteLeaveRequest(id) {
-  return http.delete(URL + "/" + id);
+  return http.delete(API_URL + "employee/leave/" + id);
 }

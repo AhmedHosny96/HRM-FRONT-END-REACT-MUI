@@ -1,8 +1,9 @@
 import http from "./httpService";
-const api = "http://localhost:5000/api/medicalExpenses";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 export function getMedicals() {
-  return http.get(api);
+  return http.get(API_URL + "medicalExpenses");
 }
 
 export function saveMedical(medical) {
@@ -10,18 +11,17 @@ export function saveMedical(medical) {
     const body = { ...medical };
     delete body._id;
     //update
-    return http.put(api + "/" + medical._id, body);
+    return http.put(API_URL + "medicalExpenses/" + medical._id, body);
   }
-  return http.post(api, medical);
+  return http.post(API_URL + "medicalExpenses", medical);
 }
 
 export function deleteMedical(id) {
-  return http.delete(api + "/" + id);
+  return http.delete(API_URL + "medicalExpenses/" + id);
 }
 
-const URL = "http://localhost:5000/api/employee/medicalExpenseRequest/";
 export function getMedicalRequests() {
-  return http.get(URL);
+  return http.get(API_URL + "employee/medicalExpenseRequest");
 }
 
 export function saveMedicalRequest(medical) {
@@ -29,11 +29,14 @@ export function saveMedicalRequest(medical) {
     const body = { ...medical };
     delete body._id;
     //update
-    return http.put(URL + "/" + medical._id, body);
+    return http.put(
+      API_URL + "employee/medicalExpenseRequest/" + medical._id,
+      body
+    );
   }
-  return http.post(URL, medical);
+  return http.post(API_URL + "employee/medicalExpenseRequest", medical);
 }
 
 export function deletMedicalRequest(id) {
-  return http.delete(URL + "/" + id);
+  return http.delete(API_URL + "employee/medicalExpenseRequest/" + id);
 }

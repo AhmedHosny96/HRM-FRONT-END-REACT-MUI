@@ -97,9 +97,11 @@ export default function login(props) {
       setIsFetching(true);
       const user = auth.getCurrentUser();
       if (user.firstLogin == 1) {
-        window.location = `/change-password/${user._id}`;
+        props.history.push(`/change-password/${user.token}`);
       } else {
-        window.location = "/admin/dashboard";
+        const { state } = props.location;
+        // window.location = state ? state.from.pathname : "/admin/dashboard";
+        props.history.push("/admin/dashboard");
       }
 
       // if (currentUser.firstLogin === 0) window.location = "/admin/dashboard";

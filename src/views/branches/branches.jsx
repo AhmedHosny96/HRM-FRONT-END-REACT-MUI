@@ -19,6 +19,7 @@ import {
 } from "../../services/branchService";
 import Notifications from "views/controls/Notifications";
 import Spin from "../common/useSpin";
+import UseAvatar from "../common/useAvatar";
 import { Empty } from "antd";
 
 import { EditOutlined, DeleteOutlined } from "@material-ui/icons/";
@@ -44,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
 //table header column configurations
 
 const headCells = [
+  { id: "avatar", label: "" },
   { id: "name", label: "Branch name" },
   { id: "region", label: "Region" },
   { id: "city", label: "City" },
@@ -155,7 +157,6 @@ export default function Branches({ user }) {
   };
   useEffect(() => {
     setIsFetching(true);
-
     fetchData();
   }, []);
   const { length: count } = records;
@@ -187,6 +188,12 @@ export default function Branches({ user }) {
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
+                <TableCell>
+                  <UseAvatar>
+                    {record.name.charAt(0).toUpperCase()}
+                    {record.name.toUpperCase().match(/(?<= )./)}
+                  </UseAvatar>
+                </TableCell>
                 <TableCell>{record.name}</TableCell>
                 <TableCell>{record.region}</TableCell>
                 <TableCell>{record.city}</TableCell>

@@ -1,16 +1,17 @@
 import http from "./httpService";
-const api = "http://localhost:5000/api/branches/";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 export function getBranches() {
-  return http.get(api);
+  return http.get(API_URL + "branches");
 }
 
 export function getActiveBranches() {
-  return http.get(api + "open");
+  return http.get(API_URL + "branches/" + "open");
 }
 
 export function getBranch(id) {
-  return http.get(api + "/" + id);
+  return http.get(API_URL + "branches/" + id);
 }
 
 export function saveBranch(branch) {
@@ -18,11 +19,11 @@ export function saveBranch(branch) {
     const body = { ...branch };
     delete body._id;
     //update
-    return http.put(api + "/" + branch._id, body);
+    return http.put(API_URL + "branches/" + branch._id, body);
   }
-  return http.post(api, branch);
+  return http.post(API_URL + "branches", branch);
 }
 
 export function deleteBranch(id) {
-  return http.delete(api + "/" + id);
+  return http.delete(API_URL + "branches/" + id);
 }

@@ -1,13 +1,18 @@
 import jwtDecode from "jwt-decode";
 import http from "../services/httpService";
 
-const api = "http://localhost:5000/api/auth";
+const API_URL = process.env.REACT_APP_API_URL;
 
 // token key
 const tokenKey = "token";
 
+http.setJwt(getJwt());
+
 export async function loginUser(email, password) {
-  const { data: token } = await http.post(api, { email, password });
+  const { data: token } = await http.post(API_URL + "auth", {
+    email,
+    password,
+  });
 
   localStorage.setItem(tokenKey, token);
 }
@@ -39,8 +44,12 @@ export function loginWithJwt(jwt) {
   window.location = "/admin/dashboard";
 }
 
-export function changePassword(id, user) {
-  return http.post(api + "/change-password/" + id, user);
+export function changePassword(token, user) {
+  return http.post(API_URL + "auth/change-password/" + token, user);
+}
+
+export function getJwt() {
+  return localStorage.getItem(tokenKey);
 }
 
 export default {
@@ -49,4 +58,5 @@ export default {
   getCurrentUser,
   changePassword,
   loginWithJwt,
+  getJwt,
 };
