@@ -16,10 +16,12 @@ const initialValues = {
   code: "",
   name: "",
   department: "",
+  description: "",
+  qualification: "",
 };
 export default function jobForm(props) {
   const classes = useStyles();
-  const { postData, recordForEdit, setNotify } = props;
+  const { postData, inputDisabled, recordForEdit, setNotify } = props;
 
   //validation
 
@@ -89,6 +91,7 @@ export default function jobForm(props) {
           value={values.code}
           onChange={handleOnChange}
           error={errors.name}
+          inputProps={{ readOnly: inputDisabled }}
         />
         <Controls.Input
           name="name"
@@ -96,6 +99,29 @@ export default function jobForm(props) {
           value={values.name}
           onChange={handleOnChange}
           error={errors.name}
+          inputProps={{ readOnly: inputDisabled }}
+        />
+        <Controls.Input
+          name="description"
+          label=" Description"
+          value={values.description}
+          onChange={handleOnChange}
+          error={errors.description}
+          inputProps={{ readOnly: inputDisabled }}
+          multiline
+          rows={3}
+          maxRows={4}
+        />
+        <Controls.Input
+          name="qualification"
+          label="Qualification"
+          value={values.qualification}
+          onChange={handleOnChange}
+          error={errors.qualification}
+          inputProps={{ readOnly: inputDisabled }}
+          multiline
+          rows={3}
+          maxRows={4}
         />
         <Controls.Select
           name="department"
@@ -104,9 +130,10 @@ export default function jobForm(props) {
           options={departments}
           onChange={handleOnChange}
           error={errors.department}
+          inputProps={{ readOnly: inputDisabled }}
         />
 
-        <Controls.Button text="Submit" type="submit" />
+        <Controls.Button text="Submit" type="submit" disabled={inputDisabled} />
       </Form>
     </div>
   );

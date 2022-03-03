@@ -21,6 +21,7 @@ import {
 import ConfirmDialog from "../controls/ConfirmDialog";
 import { Empty } from "antd";
 import Spin from "../common/useSpin";
+import UseAvatar from "views/common/useAvatar";
 //custom styles
 const useStyles = makeStyles((theme) => ({
   pageContent: {
@@ -41,16 +42,19 @@ const useStyles = makeStyles((theme) => ({
 // column header configurations
 
 const headCells = [
+  { id: "avatar", label: "" },
   { id: "employee", label: "Employee" },
   { id: "username", label: "username" },
   { id: "email", label: "Email" },
   { id: "", label: "Role" },
   { id: "status", label: "Status" },
   // { id: "role", label: "Role" },
+
   { id: "action ", label: "Action", disableSort: true },
 ];
 
-export default function Users() {
+export default function Users({ user }) {
+  console.log(user);
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -91,7 +95,7 @@ export default function Users() {
         //do the filter
         else
           return items.filter((item) =>
-            item.name.toLowerCase().includes(target.value)
+            item.username.toLowerCase().includes(target.value)
           );
       },
     });
@@ -130,11 +134,20 @@ export default function Users() {
     //close the pop up
     setOpenPopup(false);
     // notify sucess
-    setNotify({
-      isOpen: true,
-      message: ` One-time password  is sent to - ${user.email}`,
-      type: "success",
-    });
+
+    if (user.email) {
+      setNotify({
+        isOpen: true,
+        message: ` One-time password  is sent to - ${user.email}`,
+        type: "success",
+      });
+    } else {
+      setNotify({
+        isOpen: true,
+        message: ` Successfull`,
+        type: "success",
+      });
+    }
     // refresh the table
 
     fetchData();
@@ -143,9 +156,21 @@ export default function Users() {
   // fetching data into table
 
   const fetchData = async () => {
-    const { data } = await getUsers();
-    setIsFetching(false);
-    setRecords(data);
+    try {
+      const { data } = await getUsers();
+      setIsFetching(false);
+      setRecords(data);
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
+    }
   };
 
   useEffect(() => {
@@ -164,51 +189,83 @@ export default function Users() {
             className={classes.searchInput}
             onChange={handleSearch}
           ></Controls.Input>
-          <Controls.Button
-            text="+ Add new user"
-            variant="outlined"
-            size="medium"
-            className={classes.newButton}
-            onClick={() => {
-              setOpenPopup(true);
-              setRecordForEdit(null);
-            }}
-          />
+          {user && user.role === "Admin" && (
+            <Controls.Button
+              text="+ Add new user"
+              variant="outlined"
+              size="medium"
+              className={classes.newButton}
+              onClick={() => {
+                setOpenPopup(true);
+                setRecordForEdit(null);
+              }}
+            />
+          )}
         </Toolbar>
         <TableContainer>
           <TableHeader />
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
+                <TableCell>
+                  <UseAvatar>
+                    {record.employee.fullName.charAt(0).toUpperCase()}
+                    {record.employee.fullName.toUpperCase().match(/(?<= )./)}
+                  </UseAvatar>
+                </TableCell>
                 <TableCell>{record.employee.fullName}</TableCell>
                 <TableCell>{record.username}</TableCell>
                 <TableCell>{record.email}</TableCell>
-                <TableCell>{record.isAdmin ? "Admin" : "User"}</TableCell>
+                <TableCell>{record.role}</TableCell>
                 <TableCell>{record.status}</TableCell>
                 <TableCell>
-                  <Controls.ActionButton
-                    color="primary"
-                    onClick={() => setOpenPopup(true)}
-                  >
-                    <EditOutlined />
-                  </Controls.ActionButton>
-                  <Controls.ActionButton color="primary">
-                    <LockOpenOutlined />
-                  </Controls.ActionButton>
-                  <Controls.ActionButton
-                    color="secondary"
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
-                  >
-                    <DeleteOutlined />
-                  </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="primary"
+                      title="reset password"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: `Are you sure you want to reset ${record.employee.fullName}'s password ?`,
+                          subTitle: "",
+                          text: "send",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                    >
+                      <LockOpenOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
+
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="primary"
+                      onClick={() => {
+                        openInPopup(record);
+                      }}
+                      title="edit"
+                    >
+                      <EditOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
+
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

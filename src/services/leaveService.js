@@ -36,10 +36,18 @@ export function saveLeaveRequest(leaveRequest) {
   if (leaveRequest._id) {
     const body = { ...leaveRequest };
     delete body._id;
+    delete body.employee;
+    delete body.leave;
+    delete body.requestedDays;
+    delete body.__v;
     //update
     return http.put(API_URL + "employee/leave/" + leaveRequest._id, body);
   }
-  return http.post(API_URL + "employee/leave", leaveRequest);
+  return http.post(API_URL + "employee/leave", leaveRequest, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
 export function deleteLeaveRequest(id) {
   return http.delete(API_URL + "employee/leave/" + id);

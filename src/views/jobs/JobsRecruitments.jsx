@@ -6,17 +6,17 @@ import Jobs from "../jobs/Jobs.jsx";
 import Recruitments from "./Recruitments.jsx";
 import Tabs from "../common/useTabs";
 
-const tabs = [
-  {
-    label: "Job details",
-    Component: <Jobs />,
-  },
-  {
-    label: "Recruitments",
-    Component: <Recruitments />,
-  },
-];
-export default function JobsRecruitments() {
+export default function JobsRecruitments({ user, socket }) {
+  const tabs = [
+    {
+      label: "Job details",
+      Component: <Jobs user={user} socket={socket} />,
+    },
+    {
+      label: "Recruitments",
+      Component: <Recruitments user={user} socket={socket} />,
+    },
+  ];
   return (
     <div>
       <Tabs tabs={tabs}></Tabs>

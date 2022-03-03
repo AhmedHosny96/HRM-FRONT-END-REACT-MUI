@@ -1,91 +1,90 @@
-import React, { Component } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 import Admin from "layouts/Admin.js";
 import RTL from "layouts/RTL.js";
 import Login from "./views/pages/login.jsx";
 import auth from "./services/authService";
 import "assets/css/material-dashboard-react.css?v=1.10.0";
-
+import { io } from "socket.io-client";
 import ProtectedRoute from "./views/common/ProtectedRoute";
 import ChangePassword from "./views/pages/changePassword";
-import IdleTimer from "react-idle-timer";
+import { useIdleTimer } from "react-idle-timer";
 import { NotFound } from "views/common/NotFound.jsx";
+const App = () => {
+  const [user, setUser] = useState("");
+  const [socket, setSocket] = useState(null);
 
-class App extends Component {
-  state = {};
-
-  componentDidMount() {
-    const user = auth.getCurrentUser();
-    this.setState({ user });
-  }
-  handleOnAction(event) {
-    // console.log("user did something", event);
-  }
-
-  handleOnActive(event) {
-    // console.log("user is active", event);
-    // console.log("time remaining", this.idleTimer.getRemainingTime());
-  }
-
-  handleOnIdle(event) {
-    // console.log("user session ended", event);
-    // remove the token from localstorage
-    // console.log("last active", this.idleTimer.getLastActiveTime());
-
+  const handleOnIdle = (event) => {
+    console.log("last active", getLastActiveTime());
     auth.logout();
-  }
+  };
 
-  render() {
-    const { user } = this.state;
-    return (
-      <React.Fragment>
-        <IdleTimer
-          timeout={1000 * 60 * 15}
-          onActive={this.handleOnAction}
-          onIdle={this.handleOnIdle}
-          onAction={this.handleOnAction}
-          debounce={250}
+  const handleOnActive = (event) => {
+    // console.log("user is active", event);
+    // console.log("time remaining", getRemainingTime());
+  };
+
+  useEffect(() => {
+    setUser(auth.getCurrentUser());
+    // setSocket(io("http://localhost:8900"));
+  }, []);
+
+  useEffect(() => {
+    // socket?.emit("newUser", user);
+    // console.log(user);
+  }, [user]);
+
+  // logout timer
+
+  const { getRemainingTime, getLastActiveTime } = useIdleTimer({
+    timeout: 1000 * 60 * 5,
+    onIdle: handleOnIdle,
+    onActive: handleOnActive,
+    debounce: 500,
+  });
+
+  console.log(process.env.REACT_APP_PUBLIC_URL);
+
+  //TODO: render user
+  //: render user
+
+  return (
+    <React.Fragment>
+      <Switch>
+        <ProtectedRoute
+          path={`/admin`}
+          render={(props) => <Admin {...props} user={user} socket={socket} />}
         />
-        <Switch>
-          <ProtectedRoute
-            path="/admin"
-            render={(props) => <Admin {...props} user={this.state.user} />}
-          />
-          <Route
-            path="/login"
-            component={(props) => <Login {...props} user={this.state.user} />}
-          />
-          <Route
-            path="/not-found"
-            render={(props) => <NotFound {...props} />}
-          />
+        <Route
+          path="/login"
+          component={(props) => <Login {...props} user={user} />}
+        />
+        <Route path="/not-found" render={(props) => <NotFound {...props} />} />
 
-          <Route
-            path={"/change-password/:token"}
-            exact
-            render={(props) => {
-              if (user && user.firstLogin == 0) {
-                return (
-                  <Redirect
-                    to={{
-                      pathname: "/not-found",
-                      state: { from: props.location },
-                    }}
-                  />
-                );
-              }
+        <Route
+          path={"/change-password/:id/:token"}
+          exact
+          render={(props) => {
+            if (user) {
+              return (
+                <Redirect
+                  to={{
+                    pathname: "/not-found",
+                    state: { from: props.location },
+                  }}
+                />
+              );
+            }
+            return <ChangePassword {...props} user={user} />;
+          }}
+        />
 
-              return <ChangePassword {...props} user={this.state.user} />;
-            }}
-          />
-
-          <Route path="/rtl" component={RTL} />
-          <Redirect from="*" to="/not-found" />
-          <Redirect from="/" to="/admin/dashboard" />
-        </Switch>
-      </React.Fragment>
-    );
-  }
-}
+        <Route path="/rtl" component={RTL} />
+        <Redirect from="/" to="/admin/dashboard" exact />
+        <Redirect from="*" to="/not-found" />
+      </Switch>
+    </React.Fragment>
+  );
+};
 
 export default App;

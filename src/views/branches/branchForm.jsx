@@ -25,7 +25,7 @@ const initialValues = {
 
 export default function branchForm(props) {
   const classes = useStyles();
-  const { postData, recordForEdit, setNotify } = props;
+  const { postData, recordForEdit, setNotify, inputDisabled } = props;
 
   //validation
 
@@ -96,6 +96,7 @@ export default function branchForm(props) {
           value={values.name}
           onChange={handleOnChange}
           error={errors.name}
+          InputProps={{ readOnly: inputDisabled }}
         />
         <Controls.Select
           name="region"
@@ -104,6 +105,7 @@ export default function branchForm(props) {
           options={Locations}
           onChange={handleOnChange}
           error={errors.region}
+          inputProps={{ readOnly: inputDisabled }}
         />
         <Controls.Input
           name="city"
@@ -111,6 +113,7 @@ export default function branchForm(props) {
           value={values.city}
           onChange={handleOnChange}
           error={errors.city}
+          InputProps={{ readOnly: inputDisabled }}
         />
         {recordForEdit && (
           <Controls.Select
@@ -120,10 +123,11 @@ export default function branchForm(props) {
             options={statuses}
             onChange={handleOnChange}
             error={errors.status}
+            InputProps={{ readOnly: inputDisabled }}
           />
         )}
 
-        <Controls.Button text="Submit" type="submit" />
+        <Controls.Button text="Submit" type="submit" disabled={inputDisabled} />
       </Form>
     </div>
   );

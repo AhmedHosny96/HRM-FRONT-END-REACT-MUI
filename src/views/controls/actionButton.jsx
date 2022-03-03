@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, makeStyles } from "@material-ui/core";
+import { Button, makeStyles, Tooltip } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,15 +19,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 export default function ActionButton(props) {
   const classes = useStyles();
-  const { color, children, onClick, ...rest } = props;
+  const { color, children, onClick, title, ...rest } = props;
   return (
-    <Button
-    
-      className={`${classes.root} ${classes[color]}`}
-      onClick={onClick}
-      {...rest}
-    >
-      {children}
-    </Button>
+    <Tooltip title={title}>
+      <Button
+        className={`${classes.root} ${classes[color]}`}
+        onClick={onClick}
+        {...rest}
+      >
+        {children}
+      </Button>
+    </Tooltip>
   );
 }

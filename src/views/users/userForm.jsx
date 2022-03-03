@@ -5,7 +5,7 @@ import Controls from "../../views/controls/controls";
 import { makeStyles } from "@material-ui/core/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { getEmployees } from "./../../services/employeeService";
-
+import { roles, userStatus } from "../common/dropDownValues";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -13,13 +13,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const roles = ["Admin", "User"];
-
 const initialValues = {
   employeeId: "",
   username: "",
   email: "",
-  // userRole: "",
+  role: "",
+  status: "",
 };
 
 export default function userForm(props) {
@@ -49,6 +48,8 @@ export default function userForm(props) {
     true,
     validate
   );
+
+  const [inputValue, setInputValue] = useState("");
   //handle submit
 
   const handleSubmit = async (e) => {
@@ -71,55 +72,91 @@ export default function userForm(props) {
       setValues({
         ...recordForEdit,
       });
+      setInputValue(recordForEdit.employee.fullName);
     }
-  }, []);
+  }, [recordForEdit]);
 
   return (
     <div className={classes.root}>
       <Form onSubmit={handleSubmit}>
-        <Autocomplete
-          disablePortal
-          id="employeeId"
-          options={employee}
-          noOptionsText="No employee data"
-          size="small"
-          sx={{ width: 300 }}
-          getOptionLabel={(employee) => employee.fullName}
-          renderInput={(params) => (
-            <Controls.Input
-              {...params}
-              label="Employee"
-              value={values.employeeId}
-              onChange={handleOnChange}
-            />
-          )}
-          onChange={(event, selectedValue) => {
-            setValues({ employeeId: selectedValue._id });
-          }}
-        />
+        {recordForEdit ? (
+          <Autocomplete
+            disablePortal
+            id="employeeId"
+            options={employee}
+            noOptionsText="No employee data"
+            size="small"
+            inputValue={inputValue}
+            sx={{ width: 300 }}
+            getOptionLabel={(employee) => employee.fullName}
+            renderInput={(params) => (
+              <Controls.Input
+                {...params}
+                label="Employee"
+                value={values.employeeId}
+                onChange={handleOnChange}
+              />
+            )}
+            onChange={(event, selectedValue) => {
+              setValues({ employeeId: selectedValue._id });
+            }}
+          />
+        ) : (
+          <Autocomplete
+            disablePortal
+            id="employeeId"
+            options={employee}
+            noOptionsText="No employee data"
+            size="small"
+            sx={{ width: 300 }}
+            getOptionLabel={(employee) => employee.fullName}
+            renderInput={(params) => (
+              <Controls.Input
+                {...params}
+                label="Employee"
+                value={values.employeeId}
+                onChange={handleOnChange}
+              />
+            )}
+            onChange={(event, selectedValue) => {
+              setValues({ employeeId: selectedValue._id });
+            }}
+          />
+        )}
         <Controls.Input
           name="username"
           label="Username"
-          values={values.username}
+          value={values.username}
           onChange={handleOnChange}
           error={errors.username}
         />
         <Controls.Input
           name="email"
           label="Email"
-          values={values.email}
+          value={values.email}
           onChange={handleOnChange}
           error={errors.email}
         />
 
-        {/* <Controls.Select
-          name="userRole"
+        <Controls.Select
+          name="role"
           label="User role"
-          value={values.userRole}
+          value={values.role}
           options={roles}
           onChange={handleOnChange}
-          error={errors.userRole}
-        ></Controls.Select> */}
+          error={errors.role}
+        ></Controls.Select>
+
+        {recordForEdit && recordForEdit.status !== "Not verified" && (
+          <Controls.Select
+            name="status"
+            label="status"
+            value={values.status}
+            options={userStatus}
+            onChange={handleOnChange}
+            error={errors.status}
+          />
+        )}
         <Controls.Button text="Submit" type="submit" />
       </Form>
     </div>

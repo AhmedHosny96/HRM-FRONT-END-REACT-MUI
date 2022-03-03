@@ -44,8 +44,8 @@ export function loginWithJwt(jwt) {
   window.location = "/admin/dashboard";
 }
 
-export function changePassword(token, user) {
-  return http.post(API_URL + "auth/change-password/" + token, user);
+export function changePassword(id, user) {
+  return http.post(API_URL + "auth/change-password/" + id, user);
 }
 
 export function getJwt() {

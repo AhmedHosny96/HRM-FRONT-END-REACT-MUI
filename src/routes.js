@@ -60,7 +60,7 @@ const dashboardRoutes = [
   },
   {
     path: "/jobs",
-    name: "Job Details",
+    name: "Job & recruitements",
     icon: Work,
     component: JobsRecruitments,
     layout: "/admin",

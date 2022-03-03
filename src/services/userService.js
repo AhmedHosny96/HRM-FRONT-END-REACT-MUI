@@ -10,9 +10,13 @@ export function getUser(id) {
 //signing up users
 export function saveUser(user) {
   if (user._id) {
-    const { body } = { ...user };
+    const body = { ...user };
+    delete body.employee;
     delete body._id;
-    return http.put(API_URL + "auth/create/" + user._id, body);
+    delete body.password;
+    delete body.firstLogin;
+    delete body.__v;
+    return http.put(API_URL + "users/" + user._id, body);
   }
   // return http.post(API_URL + "/" + id + "/" + token, user) || http.post(API_URL, user);
   return http.post(API_URL + "auth/create", user);
@@ -21,6 +25,9 @@ export function saveUser(user) {
 
 export function getUsers() {
   return http.get(API_URL + "users");
+}
+export function getAdminUsers() {
+  return http.get(API_URL + "users/admin");
 }
 export function deleteUser(id) {
   return http.delete(API_URL + "users/" + id);

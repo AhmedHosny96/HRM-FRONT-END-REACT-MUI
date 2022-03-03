@@ -14,9 +14,9 @@ import EmployeeDocumentForm from "./EmployeeDocumentForm";
 
 import Controls from "../controls/controls";
 import {
-  EditOutlined,
   DeleteOutline,
   CloudDownloadOutlined,
+  ZoomInOutlined,
 } from "@material-ui/icons/";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 import { Empty } from "antd";
@@ -61,12 +61,14 @@ const headCells = [
   { id: "action", label: "Action", disableSort: true },
 ];
 
-export default function EmployeeDocuments() {
+export default function EmployeeDocuments({ user }) {
   const classes = useStyles();
   const [isFetching, setIsFetching] = useState(false);
 
   const [records, setRecords] = useState([]);
+  const [isImageFetching, setisImageFetching] = useState(false);
 
+  const [inputDisabled, setInputDisabled] = useState(false); // state variables for dialog pop up\
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -107,11 +109,15 @@ export default function EmployeeDocuments() {
       });
       fetchData();
     } catch (ex) {
-      setNotify({
-        isOpen: true,
-        message: ex.response.data,
-        type: "error",
-      });
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
     }
   };
 
@@ -165,12 +171,14 @@ export default function EmployeeDocuments() {
 
   // populate the data into form
 
-  const openInPopup = (item) => {
+  const openPopUpView = (item) => {
     //set the fields to be populated
     setRecordForEdit(item);
     //open in dailog popup
     setOpenPopup(true);
     //stop populating
+    setInputDisabled(true);
+    // fetching while image is downloading from server
   };
 
   const fetchData = async () => {
@@ -180,6 +188,7 @@ export default function EmployeeDocuments() {
   };
   useEffect(() => {
     setIsFetching(true);
+
     fetchData();
   }, []);
 
@@ -203,6 +212,7 @@ export default function EmployeeDocuments() {
             // startIcon={<Add />}
             onClick={() => {
               setOpenPopup(true);
+              setInputDisabled(false);
               setRecordForEdit(null);
             }}
           />
@@ -215,37 +225,46 @@ export default function EmployeeDocuments() {
                 <TableCell>{record.employee.fullName}</TableCell>
                 <TableCell>{record.employee.branch.name}</TableCell>
                 <TableCell>{record.documentType}</TableCell>
-                <TableCell>{record.details}</TableCell>
                 <TableCell>
+                  {record.details.length > 25
+                    ? record.details.slice(0, 25) + " ..."
+                    : record.details}
+                </TableCell>
+                <TableCell>
+                  <Controls.ActionButton
+                    color="primary"
+                    onClick={() => {
+                      openPopUpView(record);
+                    }}
+                    title="view"
+                  >
+                    <ZoomInOutlined fontSize="small" />
+                  </Controls.ActionButton>
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
                       window.open(record.attachment, "_blank");
                     }}
+                    title="download file"
                   >
-                    <CloudDownloadOutlined />
+                    <CloudDownloadOutlined fontSize="small" />
                   </Controls.ActionButton>
-                  <Controls.ActionButton
-                    color="primary"
-                    onClick={() => {
-                      openInPopup(record);
-                    }}
-                  >
-                    <EditOutlined />
-                  </Controls.ActionButton>
-                  <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
-                  >
-                    <DeleteOutline />
-                  </Controls.ActionButton>
+                  {user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="edit"
+                    >
+                      <DeleteOutline fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -260,7 +279,7 @@ export default function EmployeeDocuments() {
         <Pagination />
       </Paper>
       <Popup
-        title="Employee document form"
+        title="Employee document "
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >
@@ -268,6 +287,9 @@ export default function EmployeeDocuments() {
           postData={postData}
           recordForEdit={recordForEdit}
           setNotify={setNotify}
+          inputDisabled={inputDisabled}
+          // isImageFetching={isImageFetching}
+          // setisImageFetching={setisImageFetching}
         />
       </Popup>
 

@@ -91,19 +91,20 @@ export default function ChangePassword(props) {
 
     if (validate()) {
       try {
-        const token = props.match.params.token;
+        const id = props.match.params.id;
         const password = { ...values };
-        await auth.changePassword(token, password);
+        console.log(password);
+        await auth.changePassword(id, password);
         //
         setIsFetching(true);
-        window.location = "/admin/dashboard";
-
+        // props.history.push("/login");
+        window.location = "/login";
         setNotify({
           isOpen: true,
           message: "User verified successfully",
           type: "success",
         });
-        // login with jwt
+        // logout
       } catch (ex) {
         //   setNotify({
         //     isOpen: true,

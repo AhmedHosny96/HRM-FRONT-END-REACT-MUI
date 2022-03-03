@@ -13,16 +13,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const genders = ["Male", "Female", "Both"];
-
 const initialValues = {
   name: "",
-  allowedFor: "",
+  allowedFor: [],
   allowedAmount: "",
 };
 export default function MedicalForm(props) {
   const classes = useStyles();
-  const { postData, recordForEdit, setNotify } = props;
+  const { postData, recordForEdit, setNotify, inputDisabled } = props;
 
   //validation
 
@@ -90,37 +88,32 @@ export default function MedicalForm(props) {
         <Controls.Input
           name="name"
           label="Type"
-          value={values.leaveType}
+          value={values.name}
           onChange={handleOnChange}
           error={errors.name}
+          InputProps={{ readOnly: inputDisabled }}
         />
-        <Autocomplete
-          id="employeeId"
+
+        <Controls.Select
+          name="allowedFor"
+          label="Allowed for "
           options={patient}
-          size="small"
-          sx={{ width: 500 }}
-          getOptionLabel={(patient) => patient}
-          renderInput={(params) => (
-            <Controls.Input
-              {...params}
-              label="Allowed for"
-              value={values.employeeId}
-              onChange={handleOnChange}
-            />
-          )}
-          onChange={(event, selectedValue) => {
-            setValues({ employeeId: selectedValue._id });
-          }}
+          value={values.allowedFor}
+          onChange={handleOnChange}
+          error={errors.allowedFor}
+          inputProps={{ readOnly: inputDisabled }}
+          multiple
         />
         <Controls.Input
           name="allowedAmount"
           label="Allowed amount"
-          value={values.leaveType}
+          value={values.allowedAmount}
           onChange={handleOnChange}
-          error={errors.name}
+          error={errors.allowedAmount}
+          InputProps={{ readOnly: inputDisabled }}
         />
 
-        <Controls.Button text="Submit" type="submit" />
+        <Controls.Button text="Submit" type="submit" disabled={inputDisabled} />
       </Form>
     </div>
   );

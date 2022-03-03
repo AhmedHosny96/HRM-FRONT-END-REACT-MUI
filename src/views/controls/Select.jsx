@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 
 export default function Select(props) {
-  const { name, label, value, onChange, options, error, disabled } = props;
+  const { name, label, value, onChange, options, error, ...rest } = props;
   return (
     <FormControl
       size="small"
@@ -22,8 +22,8 @@ export default function Select(props) {
         label={label}
         value={value}
         onChange={onChange}
-        disabled={disabled}
         required
+        {...rest}
       >
         <MenuItem value=""></MenuItem>
         {options.map((option) => (

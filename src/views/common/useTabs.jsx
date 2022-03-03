@@ -31,7 +31,7 @@ function TabPanel(props) {
   );
 }
 
-export default function UseTabs({ tabs }) {
+export default function UseTabs({ tabs, user, socket }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
 
@@ -57,7 +57,7 @@ export default function UseTabs({ tabs }) {
         </Tabs>
       </Box>
       {tabs.map(({ Component }, i) => (
-        <TabPanel value={value} index={i} key={i}>
+        <TabPanel value={value} index={i} key={i} user={user} socket={socket}>
           {Component}
         </TabPanel>
       ))}

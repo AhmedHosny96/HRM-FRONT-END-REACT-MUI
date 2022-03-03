@@ -37,6 +37,7 @@ export default function Popup(props) {
             disabled={popUpClose}
             color="primary"
             onClick={() => setOpenPopup(false)}
+            title="Close"
           >
             <Close />
           </Controls.ActionButton>

@@ -54,7 +54,7 @@ const headCells = [
   { id: "action", label: "Action" },
 ];
 
-export default function employees({ user }) {
+export default function Employees({ user }) {
   console.log(user);
   const classes = useStyles();
   const [isFetching, setIsFetching] = useState(false);
@@ -118,11 +118,13 @@ export default function employees({ user }) {
 
     setFilterFn({
       fn: (items) => {
-        if (target.value == "") return items;
-        else
+        if (target.value == " ") {
+          return items;
+        } else {
           return items.filter((item) =>
             item.fullName.toLowerCase().includes(target.value)
           );
+        }
       },
     });
   };
@@ -152,7 +154,17 @@ export default function employees({ user }) {
       const { data } = await getEmployees();
       setRecords(data);
       setIsFetching(false);
-    } catch (ex) {}
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
+    }
   };
 
   useEffect(() => {
@@ -202,7 +214,11 @@ export default function employees({ user }) {
                 <TableCell>{record.job.name}</TableCell>
                 <TableCell>{record.phoneNumber}</TableCell>
 
-                <TableCell style={{ color: "darkblue" }}>
+                <TableCell
+                  style={{
+                    color: record.status === "Active" ? "blue" : "red",
+                  }}
+                >
                   {record.status}
                 </TableCell>
                 <TableCell>
@@ -211,21 +227,25 @@ export default function employees({ user }) {
                     onClick={() => {
                       openInPopup(record);
                     }}
+                    title="edit"
                   >
-                    <EditOutlined />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
-                  <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: `Are you sure you want to delete ${record.fullName} ?`,
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
-                  >
-                    <DeleteOutlined />
-                  </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: `Are you sure you want to delete ${record.fullName} ?`,
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

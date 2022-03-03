@@ -22,7 +22,12 @@ import Spin from "../common/useSpin";
 import UseAvatar from "../common/useAvatar";
 import { Empty } from "antd";
 
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons/";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ZoomInOutlined,
+  FormatColorResetTwoTone,
+} from "@material-ui/icons/";
 const useStyles = makeStyles((theme) => ({
   pageContent: {
     margin: theme.spacing(0),
@@ -55,11 +60,13 @@ const headCells = [
 ];
 
 export default function Branches({ user }) {
+  console.log(user);
   const classes = useStyles();
   const [isFetching, setIsFetching] = useState(false);
 
   const [records, setRecords] = useState([]);
-  0;
+
+  const [inputDisabled, setInputDisabled] = useState(false); // state variables for dialog pop up\
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -147,7 +154,16 @@ export default function Branches({ user }) {
     setRecordForEdit(item);
     //open in dailog popup
     setOpenPopup(true);
-    //stop populating
+
+    setInputDisabled(false);
+  };
+  const openInPopupView = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //read-only fields
+    setInputDisabled(true);
   };
 
   const fetchData = async () => {
@@ -202,24 +218,37 @@ export default function Branches({ user }) {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInPopupView(record);
                     }}
+                    title="view"
                   >
-                    <EditOutlined />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
                   <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
+                    color="primary"
+                    onClick={() => {
+                      openInPopup(record);
+                    }}
+                    title="edit"
                   >
-                    <DeleteOutlined />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -240,6 +269,7 @@ export default function Branches({ user }) {
           postData={postData}
           recordForEdit={recordForEdit}
           setNotify={setNotify}
+          inputDisabled={inputDisabled}
         />
       </Popup>
 

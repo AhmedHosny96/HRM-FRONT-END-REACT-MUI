@@ -28,6 +28,8 @@ export function saveMedicalRequest(medical) {
   if (medical._id) {
     const body = { ...medical };
     delete body._id;
+    delete body.createdAt;
+    delete body.updatedAt;
     //update
     return http.put(
       API_URL + "employee/medicalExpenseRequest/" + medical._id,

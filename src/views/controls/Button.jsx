@@ -5,9 +5,9 @@ import { makeStyles } from "@material-ui/core/styles";
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: theme.spacing(1),
-    backgroundColor: "#6F117D",
+    backgroundColor: "darkBlue",
     "&:hover": {
-      backgroundColor: "purple",
+      // backgroundColor: "blue",
     },
     "& .MuiButton-label": {
       textTransform: "none",
@@ -27,6 +27,7 @@ export default function useButton(props) {
       color="primary"
       variant="contained"
       onClick={onClick}
+      disableRipple
       {...rest}
     >
       {text}

@@ -13,7 +13,7 @@ import Controls from "../controls/controls";
 import {
   EditOutlined,
   DeleteOutline,
-  RemoveRedEyeOutlined,
+  ZoomInOutlined,
 } from "@material-ui/icons/";
 import Popup from "../controls/Popup";
 import ConfirmDialog from "../controls/ConfirmDialog";
@@ -22,6 +22,8 @@ import {
   saveRecruitment,
   deleteRecruitment,
 } from "../../services/recruitmentService";
+
+import { getAdminUsers } from "../../services/userService";
 import { Empty } from "antd";
 
 import Notifications from "views/controls/Notifications";
@@ -50,14 +52,16 @@ const headCells = [
   { id: "branchId", label: "Branch" },
   { id: "requiredNumber", label: "Required no" },
   { id: "employementType", label: "Employment Type" },
+  { id: "createdAt", label: "Date" },
   { id: "status", label: "Status" },
 
   { id: "action", label: "Action", disableSort: true },
 ];
-export default function Recruitments() {
+export default function Recruitments({ user, socket }) {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [openPopup, setOpenPopup] = useState(false);
+  const [adminUser, setAdminUser] = useState("");
 
   const [isFetching, setIsFetching] = useState(false);
 
@@ -87,6 +91,17 @@ export default function Recruitments() {
     recordsAfterPagingAndSorting,
   } = useTable(records, headCells, filterFn);
 
+  // get admin user
+  const getAdminUser = () => {
+    getAdminUsers().then((data) => setAdminUser(data.data[0]));
+  };
+  console.log(adminUser.username);
+  useEffect(() => {
+    setIsFetching(true);
+    fetchData();
+    getAdminUser();
+  }, []);
+
   // posting and update data into db for branchesform
   const postData = async (recruitment) => {
     const data = { ...recruitment };
@@ -95,7 +110,9 @@ export default function Recruitments() {
     //close the pop
     setOpenPopup(false);
 
-    // send notify alert
+    //send notification
+
+    // send  alert
     setNotify({
       isOpen: true,
       message: "Successfull !",
@@ -149,7 +166,7 @@ export default function Recruitments() {
     setRecordForEdit(item);
     //open in dailog popup
     setOpenPopup(true);
-    //stop populating
+    //stop enable input fields
     setInputDisabled(false);
   };
 
@@ -158,7 +175,7 @@ export default function Recruitments() {
     setRecordForEdit(item);
     //open in dailog popup
     setOpenPopup(true);
-    //stop populating
+    //set the fields to read-only
     setInputDisabled(true);
   };
 
@@ -172,16 +189,13 @@ export default function Recruitments() {
       } else {
         setNotify({
           isOpen: true,
-          message: "Unexpected error occurred !",
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
           type: "error",
         });
       }
     }
   };
-  useEffect(() => {
-    setIsFetching(true);
-    fetchData();
-  }, []);
 
   const { length: count } = records;
   return (
@@ -216,6 +230,11 @@ export default function Recruitments() {
                 <TableCell>{record.branch.name}</TableCell>
                 <TableCell>{record.requiredNumber}</TableCell>
                 <TableCell>{record.employementType}</TableCell>
+                <TableCell>
+                  {record.createdAt.length > 11
+                    ? record.createdAt.slice(0, 10)
+                    : ""}
+                </TableCell>
                 <TableCell style={{}}>{record.status}</TableCell>
 
                 <TableCell>
@@ -224,30 +243,35 @@ export default function Recruitments() {
                     onClick={() => {
                       openInPopupView(record);
                     }}
+                    title="view"
                   >
-                    <RemoveRedEyeOutlined />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
                       openInPopupEdit(record);
                     }}
+                    title="edit"
                   >
-                    <EditOutlined />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
-                  <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
-                  >
-                    <DeleteOutline />
-                  </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutline fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

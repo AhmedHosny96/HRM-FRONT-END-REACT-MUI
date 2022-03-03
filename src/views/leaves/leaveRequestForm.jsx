@@ -7,8 +7,8 @@ import {
   getActiveEmployees,
   getEmployees,
 } from "../../services/employeeService";
-import { getLeaves } from "../../services/leaveService";
-import { getActiveBranches } from "services/branchService";
+import { getLeaves } from "./../../services/leaveService";
+import { getActiveBranches, getBranches } from "services/branchService";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -16,21 +16,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+import { statuses } from "../common/dropDownValues";
 // const employees = ["Ahmed ", "Hosny"];
 
 const initialValues = {
   employeeId: "",
   leaveId: "",
-  startDate: new Date(),
+  startDate: Date.now(),
   returnDate: new Date(),
-  leave: [],
-  employee: [],
+  status: "",
 };
 export default function LeaveRequestForm(props) {
   const classes = useStyles();
-  const { postData, recordForEdit, setNotify } = props;
-  const [leaves, setLeaves] = useState([]);
-  //validation
+  const { postData, recordForEdit, setNotify, isInputDisabled } = props;
+
+  const [inputValue, setInputValue] = useState("");
+  const [inputValueLeave, setInputValueLeave] = useState("");
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
@@ -38,7 +39,7 @@ export default function LeaveRequestForm(props) {
     //   temp.branchId = fieldValues.branchId ? "" : "select your branch";
     if ("employeeId" in fieldValues)
       temp.employeeId = fieldValues.employeeId ? "" : "employee is required";
-    if ("type" in fieldValues)
+    if ("leaveId" in fieldValues)
       temp.type = fieldValues.type ? "" : "Leave type is required";
     if ("startDate" in fieldValues)
       temp.startDate = fieldValues.startDate ? "" : "Start date is required";
@@ -58,6 +59,7 @@ export default function LeaveRequestForm(props) {
   );
 
   const [employee, setEmployee] = useState("");
+  const [leaves, setLeaves] = useState([]);
 
   //populating data into form
 
@@ -71,15 +73,16 @@ export default function LeaveRequestForm(props) {
   };
 
   useEffect(async () => {
-    populateValues();
-
     populateLeaves();
+    populateValues();
 
     if (recordForEdit != null) {
       setValues({
         ...recordForEdit,
         // employeeId: recordForEdit.employee._id,
       });
+      setInputValue(recordForEdit.employee.fullName);
+      setInputValueLeave(recordForEdit.leave.leaveType);
     }
   }, [recordForEdit]);
 
@@ -104,7 +107,7 @@ export default function LeaveRequestForm(props) {
   return (
     <div className={classes.root}>
       <Form onSubmit={handleSubmit}>
-        {/* <Autocomplete
+        <Autocomplete
           disablePortal
           id="employeeId"
           options={employee}
@@ -115,6 +118,7 @@ export default function LeaveRequestForm(props) {
             <Controls.Input
               {...params}
               label="Employee"
+              name="employeeId"
               value={values.employeeId}
               onChange={handleOnChange}
             />
@@ -122,50 +126,62 @@ export default function LeaveRequestForm(props) {
           onChange={(event, selectedValue) => {
             setValues({ employeeId: selectedValue._id });
           }}
-        /> */}
-        {/* 
+          inputValue={recordForEdit ? inputValue : undefined}
+        />
+
         <Autocomplete
           disablePortal
-          id="leaveId"
+          id="employeeId"
           options={leaves}
           size="small"
           sx={{ width: 300 }}
-          getOptionLabel={(leaves) => leaves.leaveType || leaves}
+          getOptionLabel={(leave) => leave.leaveType || leave}
           renderInput={(params) => (
             <Controls.Input
               {...params}
               label="Leave type"
+              name="leaveId"
               value={values.leaveId}
               onChange={handleOnChange}
             />
           )}
           onChange={(event, selectedValue) => {
-            setValues({ leaveId: selectedValue._id }, console.log(leaveId));
+            setValues({ ...values, leaveId: selectedValue._id });
           }}
-        /> */}
-        <Controls.Select
+          inputValue={recordForEdit ? inputValueLeave : undefined}
+        />
+
+        {/* <Controls.Select
           name="leaveId"
-          label="Leave"
+          label="Leave type"
           value={values.leaveId}
           options={leaves}
           onChange={handleOnChange}
           error={errors.leaveId}
-          required
-        />
+        /> */}
         <Controls.Date
           name="startDate"
           label="Start date"
           value={values.startDate}
           onChange={handleOnChange}
-          type="Date"
         />
         <Controls.Date
           name="returnDate"
           label="Return date"
           value={values.returnDate}
           onChange={handleOnChange}
-          type="Date"
+          required
         />
+        {recordForEdit && (
+          <Controls.Select
+            name="status"
+            label="Status"
+            value={values.status}
+            options={statuses}
+            onChange={handleOnChange}
+            required
+          />
+        )}
         <Controls.Button text="Submit" type="submit" />
       </Form>
     </div>

@@ -13,7 +13,7 @@ import routes from "routes.js";
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
 import bgImage from "assets/img/backgroundcolor.jpg";
-import logo from "assets/img/reactlogo.png";
+import logo from "assets/img/rays.PNG";
 
 const useStyles = makeStyles(styles);
 
@@ -28,10 +28,8 @@ export default function Admin({ user }, { ...rest }) {
           return (
             <Route
               path={prop.layout + prop.path}
-              render={() => <prop.component user={user} />}
+              render={(props) => <prop.component user={user} />}
               key={key}
-
-              // user={user}
             />
           );
         }
@@ -91,12 +89,13 @@ export default function Admin({ user }, { ...rest }) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
-        logoText={"Rays MFI"}
+        logoText={"Rays MFI HRM"}
         logo={logo}
         image={image}
         handleDrawerToggle={handleDrawerToggle}
         open={mobileOpen}
         color={color}
+        user={user}
         {...rest}
       />
       <div className={classes.mainPanel} ref={mainPanel}>

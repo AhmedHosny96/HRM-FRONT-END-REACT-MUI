@@ -7,7 +7,11 @@ import {
   Toolbar,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ZoomInOutlined,
+} from "@material-ui/icons";
 import Controls from "../controls/controls";
 import Popup from "../controls/Popup";
 import { useTable } from "../common/useTable";
@@ -44,16 +48,19 @@ const headCells = [
   { id: "employeeId", label: "Employee" },
   { id: "branch", label: "Branch" },
   { id: "name", label: "Patient name" },
-  { id: "patientName", label: "relation " },
+  // { id: "patientName", label: "relation " },
   { id: "amount", label: "Amount" },
+  { id: "createdAt", label: "Date" },
   { id: "status", label: "Status" },
   { id: "action", label: "Action", disableSort: true },
 ];
 
-const MedicalRequests = () => {
+const MedicalRequests = ({ user, socket }) => {
+  console.log(socket);
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
+  const [inputDisabled, setInputDisabled] = useState(false);
 
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
@@ -104,6 +111,18 @@ const MedicalRequests = () => {
     //open in dailog popup
     setOpenPopup(true);
     //stop populating
+    setInputDisabled(false);
+  };
+
+  // view pop up
+
+  const openInPopupView = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //set the fields to read-only
+    setInputDisabled(true);
   };
 
   //handle delete
@@ -129,6 +148,8 @@ const MedicalRequests = () => {
     const data = { ...medicalRequest };
     await saveMedicalRequest(data);
 
+    // if request is made send notification
+
     //close the pop
     setOpenPopup(false);
     // send notify alert
@@ -142,9 +163,21 @@ const MedicalRequests = () => {
   };
   // fetching records from DB
   const fetchData = async () => {
-    const { data } = await getMedicalRequests();
-    setIsFetching(false);
-    setRecords(data);
+    try {
+      const { data } = await getMedicalRequests();
+      setIsFetching(false);
+      setRecords(data);
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
+    }
   };
   useEffect(() => {
     setIsFetching(true);
@@ -181,32 +214,52 @@ const MedicalRequests = () => {
               <TableRow key={record._id}>
                 <TableCell>{record.employee.fullName}</TableCell>
                 <TableCell>{record.employee.branch.name}</TableCell>
-                <TableCell>{record.name}</TableCell>
-                <TableCell>{record.patient}</TableCell>
+                <TableCell>
+                  {!record.name ? record.employee.fullName : record.name}
+                </TableCell>
+                {/* <TableCell>{record.patient}</TableCell> */}
                 <TableCell>{record.amount}</TableCell>
+                <TableCell>
+                  {record.createdAt.length > 11
+                    ? record.createdAt.slice(0, 10)
+                    : ""}
+                </TableCell>
                 <TableCell>{record.status}</TableCell>
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record);
+                      openInPopupView(record);
                     }}
+                    title="View"
                   >
-                    <EditOutlined />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
                   <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
+                    color="primary"
+                    onClick={() => {
+                      openInPopup(record);
+                    }}
+                    title="Edit"
                   >
-                    <DeleteOutlined />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
+                  {user && user.role == "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="Delete"
+                    >
+                      <DeleteOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -226,6 +279,7 @@ const MedicalRequests = () => {
           recordForEdit={recordForEdit}
           setNotify={setNotify}
           postData={postData}
+          inputDisabled={inputDisabled}
         />
       </Popup>
       <Notifications notify={notify} setNotify={setNotify} />

@@ -14,6 +14,7 @@ export function saveRecruitment(recruitment) {
   if (recruitment._id) {
     const body = { ...recruitment };
     delete body._id;
+    delete body.createdAt;
     //update
     return http.put(API_URL + "recruitments/" + recruitment._id, body);
   }

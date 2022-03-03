@@ -13,7 +13,11 @@ import UseAvatar from "views/common/useAvatar";
 import JobForm from "./jobForm";
 
 import Controls from "../controls/controls";
-import { EditOutlined, DeleteOutline } from "@material-ui/icons/";
+import {
+  EditOutlined,
+  DeleteOutline,
+  ZoomInOutlined,
+} from "@material-ui/icons/";
 import Popup from "../controls/Popup";
 import ConfirmDialog from "../controls/ConfirmDialog";
 import { saveJob, getJobs, deleteJob } from "../../services/jobService";
@@ -50,11 +54,12 @@ const headCells = [
   { id: "action", label: "Action", disableSort: true },
 ];
 
-export default function Jobs() {
+export default function Jobs({ user, socket }) {
+  console.log(socket, user);
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
-
+  const [inputDisabled, setInputDisabled] = useState(false);
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -67,6 +72,7 @@ export default function Jobs() {
     title: "",
     subTitle: "",
   });
+  //
   const [filterFn, setFilterFn] = useState({
     //filter function initially no filter operation
     fn: (items) => {
@@ -142,13 +148,35 @@ export default function Jobs() {
     setRecordForEdit(item);
     //open in dailog popup
     setOpenPopup(true);
-    //stop populating
+
+    //
+    setInputDisabled(false);
+  };
+  const openInPopupView = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //set the fields to read-only
+    setInputDisabled(true);
   };
 
   const fetchData = async () => {
-    const { data } = await getJobs();
-    setIsFetching(false);
-    setRecords(data);
+    try {
+      const { data } = await getJobs();
+      setIsFetching(false);
+      setRecords(data);
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
+    }
   };
   useEffect(() => {
     setIsFetching(true);
@@ -193,24 +221,37 @@ export default function Jobs() {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInPopupView(record);
                     }}
+                    title="view"
                   >
-                    <EditOutlined />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
                   <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
+                    color="primary"
+                    onClick={() => {
+                      openInPopup(record), console.log(record);
+                    }}
+                    title="edit"
                   >
-                    <DeleteOutline />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutline fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -231,6 +272,7 @@ export default function Jobs() {
           postData={postData}
           recordForEdit={recordForEdit}
           setNotify={setNotify}
+          inputDisabled={inputDisabled}
         />
       </Popup>
 

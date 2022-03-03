@@ -10,6 +10,9 @@ export function saveJob(job) {
   if (job._id) {
     const body = { ...job };
     delete body._id;
+    delete body.__v;
+    delete body.createdAt;
+    delete body.updatedAt;
     //update
     return http.put(API_URL + "jobs/" + job._id, body);
   }

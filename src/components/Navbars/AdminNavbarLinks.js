@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -23,10 +23,12 @@ import auth from "../../services/authService";
 
 const useStyles = makeStyles(styles);
 
-export default function AdminNavbarLinks(props) {
+export default function AdminNavbarLinks({ user, socket }) {
   const classes = useStyles();
   const [openNotification, setOpenNotification] = React.useState(null);
   const [openProfile, setOpenProfile] = React.useState(null);
+
+  const [notifications, setNotifications] = useState([]);
   const handleClickNotification = (event) => {
     if (openNotification && openNotification.contains(event.target)) {
       setOpenNotification(null);
@@ -48,7 +50,6 @@ export default function AdminNavbarLinks(props) {
   // loggin out users
   const handleCloseProfile = () => {
     setOpenProfile(null);
-    console.log(props.user);
   };
   const handleUserLogout = () => {
     auth.logout();
@@ -56,6 +57,14 @@ export default function AdminNavbarLinks(props) {
     setOpenProfile(null);
     // props.history.push("/login");
   };
+
+  useEffect(() => {
+    socket?.on("getNotification", (data) => {
+      setNotifications((prev) => [...prev, data]);
+    });
+  }, [socket]);
+
+  console.log(notifications.message);
 
   return (
     <div>
@@ -97,8 +106,12 @@ export default function AdminNavbarLinks(props) {
           onClick={handleClickNotification}
           className={classes.buttonLink}
         >
-          <Notifications className={classes.icons} />
-          <span className={classes.notifications}>5</span>
+          <Notifications fontSize="large" />
+          {notifications.length > 0 && (
+            <span className={classes.notifications}>
+              {notifications.length}
+            </span>
+          )}
           <Hidden mdUp implementation="css">
             <p onClick={handleCloseNotification} className={classes.linkText}>
               Notification
@@ -128,36 +141,30 @@ export default function AdminNavbarLinks(props) {
               <Paper>
                 <ClickAwayListener onClickAway={handleCloseNotification}>
                   <MenuList role="menu">
+                    {notifications.map((n) => (
+                      <MenuItem
+                        onClick={handleCloseNotification}
+                        className={classes.dropdownItem}
+                      >
+                        {n.message}
+                      </MenuItem>
+                    ))}
+                    {/* <MenuItem
+                      onClick={handleCloseNotification}
+                      className={classes.dropdownItem}
+                    ></MenuItem>
                     <MenuItem
                       onClick={handleCloseNotification}
                       className={classes.dropdownItem}
-                    >
-                      Mike John responded to your email
-                    </MenuItem>
+                    ></MenuItem>
                     <MenuItem
                       onClick={handleCloseNotification}
                       className={classes.dropdownItem}
-                    >
-                      You have 5 new tasks
-                    </MenuItem>
+                    ></MenuItem>
                     <MenuItem
                       onClick={handleCloseNotification}
                       className={classes.dropdownItem}
-                    >
-                      You{"'"}re now friend with Andrew
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={classes.dropdownItem}
-                    >
-                      Another Notification
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={classes.dropdownItem}
-                    >
-                      Another One
-                    </MenuItem>
+                    ></MenuItem> */}
                   </MenuList>
                 </ClickAwayListener>
               </Paper>
@@ -175,7 +182,7 @@ export default function AdminNavbarLinks(props) {
           onClick={handleClickProfile}
           className={classes.buttonLink}
         >
-          <Person className={classes.icons} />
+          <Person className={classes.icons} fontSize="large" />
           <Hidden mdUp implementation="css">
             <p className={classes.linkText}>Profile</p>
           </Hidden>

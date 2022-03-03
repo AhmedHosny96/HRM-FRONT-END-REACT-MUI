@@ -9,7 +9,11 @@ import {
 } from "@material-ui/core";
 import LeaveRequestForm from "./LeaveRequestForm";
 import { makeStyles } from "@material-ui/core/styles";
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ZoomInOutlined,
+} from "@material-ui/icons";
 import Controls from "../controls/controls";
 import Popup from "../controls/Popup";
 import { useTable } from "../common/useTable";
@@ -24,7 +28,7 @@ import Notifications from "views/controls/Notifications";
 import Spin from "../common/useSpin";
 const useStyles = makeStyles((theme) => ({
   pagecontent: {
-    margin: theme.spacing(2),
+    margin: theme.spacing(1),
     padding: theme.spacing(1),
   },
   searchInput: {
@@ -46,15 +50,16 @@ const headCells = [
   { id: "leaveId", label: "Leave type" },
   { id: "startDate", label: "Start date" },
   { id: "returnDate", label: "Return date" },
+  { id: "requestedDays", label: "Days" },
   { id: "status", label: "Status" },
   { id: "action", label: "Action", disableSort: true },
 ];
-export default function leaves() {
+export default function leaves({ user }) {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
-  0;
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [isFetching, setIsFetching] = useState(false);
+  const [isInputDisabled, setIsInputDisabled] = useState(false);
 
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -92,7 +97,7 @@ export default function leaves() {
         //do the filter
         else
           return items.filter((item) =>
-            item.name.toLowerCase().includes(target.value)
+            item.employee.fullName.toLowerCase().includes(target.value)
           );
       },
     });
@@ -104,6 +109,14 @@ export default function leaves() {
     //open in dailog popup
     setOpenPopup(true);
     //stop populating
+  };
+  const openInPopupView = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //stop populating
+    setInputDisabled(true);
   };
 
   //handle delete
@@ -138,13 +151,27 @@ export default function leaves() {
       type: "success",
     });
 
+    console.log(data);
+
     fetchData();
   };
   // fetching records from DB
   const fetchData = async () => {
-    const { data } = await getLeaveRequests();
-    setIsFetching(false);
-    setRecords(data);
+    try {
+      const { data } = await getLeaveRequests();
+      setIsFetching(false);
+      setRecords(data);
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
+    }
   };
   useEffect(() => {
     setIsFetching(true);
@@ -179,34 +206,60 @@ export default function leaves() {
           <TableBody>
             {recordsAfterPagingAndSorting().map((record) => (
               <TableRow key={record._id}>
-                <TableCell>{record.employee.fullName}</TableCell>
+                <TableCell>
+                  {record.employee.fullName.length > 11
+                    ? record.employee.fullName.slice(0, 11) + "..."
+                    : ""}
+                </TableCell>
                 <TableCell>{record.employee.branch.name}</TableCell>
                 <TableCell>{record.leave.leaveType}</TableCell>
-                <TableCell>{record.startDate}</TableCell>
-                <TableCell>{record.returnDate}</TableCell>
+                <TableCell>
+                  {record.startDate.length > 11
+                    ? record.startDate.slice(0, 10)
+                    : ""}
+                </TableCell>
+                <TableCell>
+                  {record.returnDate.length > 11
+                    ? record.returnDate.slice(0, 10)
+                    : ""}
+                </TableCell>
+                <TableCell>{record.requestedDays}</TableCell>
                 <TableCell>{record.status}</TableCell>
                 <TableCell>
-                  <Controls.ActionButton
+                  {/* <Controls.ActionButton
                     color="primary"
                     onClick={() => {
                       openInPopup(record), console.log(record);
                     }}
+                    title="edit"
                   >
-                    <EditOutlined />
-                  </Controls.ActionButton>
+                    <ZoomInOutlined fontSize="small" />
+                  </Controls.ActionButton> */}
                   <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
+                    color="primary"
+                    onClick={() => {
+                      openInPopup(record);
+                    }}
+                    title="edit"
                   >
-                    <DeleteOutlined />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -227,6 +280,7 @@ export default function leaves() {
           recordForEdit={recordForEdit}
           setNotify={setNotify}
           postData={postData}
+          isInputDisabled={isInputDisabled}
         />
       </Popup>
       <Notifications notify={notify} setNotify={setNotify} />

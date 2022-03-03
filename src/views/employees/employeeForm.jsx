@@ -22,6 +22,7 @@ const initialValues = {
   employmentStatus: "",
   startDate: new Date(),
   status: "Active",
+  attachment: "",
   branch: [],
   job: [],
 };
@@ -209,8 +210,28 @@ export default function employeeForm(props) {
         />
       )}
 
-      {recordForEdit && <Controls.Button text="Update " type="submit" />}
-      {!recordForEdit && <Controls.Button text="Submit" type="submit" />}
+      {/* {[
+        values.status === "Contract terminated" ||
+        values.status === "Resigned" ? (
+          <Controls.Input
+            name="attachment"
+            value={values.attachment}
+            onChange={handleOnChange}
+            // error={errors.status}
+            type="file"
+            required
+          />
+        ) : (
+          ""
+        ),
+      ]} */}
+
+      <Controls.Button
+        text={recordForEdit ? "Update" : "Submit"}
+        type="submit"
+      />
+      {/* {recordForEdit && }
+      {!recordForEdit && <Controls.Button text="Submit" type="submit" />} */}
     </Form>
   );
 }

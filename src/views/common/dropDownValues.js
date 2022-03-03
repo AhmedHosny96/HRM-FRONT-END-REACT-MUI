@@ -30,4 +30,10 @@ export const employeeStatus = [
 
 export const statuses = ["Approved", "Cancelled", "Pending"];
 
-export const patient = ["staff", "wife", "child", "husband"];
+export const patient = ["staff", "spouse", "child"];
+
+export const roles = ["User", "Hr officer", "Admin"];
+
+export const userStatus = ["Active", "Deactivated"];
+
+export const maritalStatus = ["Single", "Married"];

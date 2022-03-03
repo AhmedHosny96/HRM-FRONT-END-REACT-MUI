@@ -4,12 +4,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Gender, statuses, patient } from "../../views/common/dropDownValues";
+import {
+  Gender,
+  statuses,
+  maritalStatus,
+} from "../../views/common/dropDownValues";
 import {
   getActiveEmployees,
   getEmployees,
 } from "./../../services/employeeService";
-import { getMedicals } from "./../../services/medicalService";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,20 +22,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const initialValues = {
-  medicalExpenseId: "",
   employeeId: "",
-  patient: "",
-  name: "",
-  gender: "",
-  age: "",
-  hospitalName: "",
-  location: "",
-  amount: "",
-  status: "",
+  maritalStatus: "",
+  spouseName: "",
+  children: "",
+  contactPersonName: "",
+  contactPersonPhone: "",
+
   //   card: "",
   //   prescription: "",
 };
-export default function MedicalRequestForm(props) {
+export const OtherRecordsForm = (props) => {
   const classes = useStyles();
   const { postData, recordForEdit, inputDisabled, setNotify } = props;
 
@@ -60,7 +60,6 @@ export default function MedicalRequestForm(props) {
   );
   const [inputValue, setInputValue] = useState("");
   const [employee, setEmployee] = useState("");
-  const [medical, setMedical] = useState([]);
 
   //populating data into form
 
@@ -69,21 +68,14 @@ export default function MedicalRequestForm(props) {
     setEmployee(employees);
   };
 
-  const populateMedical = async () => {
-    const { data: medicals } = await getMedicals();
-    setMedical(medicals);
-  };
-
   useEffect(() => {
     //populate if there are records
 
     populateValues();
-    populateMedical();
 
     if (recordForEdit != null) {
       setValues({
         ...recordForEdit,
-        medicalExpenseId: recordForEdit.medicalExpense._id,
       });
       setInputValue(recordForEdit.employee.fullName);
     }
@@ -158,107 +150,57 @@ export default function MedicalRequestForm(props) {
             }}
           />
         )}
+
         <Controls.Select
-          name="medicalExpenseId"
-          label="Medical claim"
-          value={values.medicalExpenseId}
-          options={medical}
+          name="maritalStatus"
+          label="marital status"
+          value={values.maritalStatus}
+          options={maritalStatus}
           onChange={handleOnChange}
           inputProps={{ readOnly: inputDisabled }}
         />
-        {/* <Autocomplete
-          disablePortal
-          id="medicalExpenseId"
-          options={medical}
-          size="small"
-          sx={{ width: 300 }}
-          getOptionLabel={(medical) => medical.name}
-          renderInput={(params) => (
+        {[
+          values.maritalStatus === "Married" && [
             <Controls.Input
-              {...params}
-              label="Medical claim"
-              value={values.medicalExpenseId}
+              name="spouseName"
+              label="spouse name"
+              value={values.spouseName || values.employee}
               onChange={handleOnChange}
-            />
-          )}
-          onChange={(event, selectedValue) => {
-            setValues({ medicalExpenseId: selectedValue._id });
-          }}
-        /> */}
-
-        <Controls.Select
-          name="patient"
-          label="patient"
-          value={values.patient}
-          options={patient}
-          onChange={handleOnChange}
-          inputProps={{ readOnly: inputDisabled }}
-        />
-        {values.patient != "staff" && (
-          <Controls.Input
-            name="name"
-            label="name"
-            value={values.name || values.employee}
-            onChange={handleOnChange}
-            inputProps={{ readOnly: inputDisabled }}
-          />
-        )}
-
-        {values.patient != "staff" && (
-          <Controls.Select
-            name="gender"
-            label="Gender"
-            value={values.gender}
-            options={Gender}
-            onChange={handleOnChange}
-            inputProps={{ readOnly: inputDisabled }}
-          />
-        )}
-        {values.patient != "staff" && (
-          <Controls.Input
-            name="age"
-            label="Age"
-            value={values.age}
-            onChange={handleOnChange}
-            type="number"
-            inputProps={{ readOnly: inputDisabled }}
-          />
-        )}
+              inputProps={{ readOnly: inputDisabled }}
+            />,
+            <Controls.Input
+              name="children"
+              label="No of children"
+              value={values.children}
+              onChange={handleOnChange}
+              type="number"
+              inputProps={{ readOnly: inputDisabled }}
+            />,
+          ],
+        ]}
 
         <Controls.Input
-          name="hospitalName"
-          label="Hospital"
-          value={values.hospitalName}
+          name="contactPersonName"
+          label="contact person"
+          value={values.contactPersonName}
           onChange={handleOnChange}
           inputProps={{ readOnly: inputDisabled }}
+          multiline
+          rows={2}
         />
         <Controls.Input
-          name="location"
-          label="Location"
-          value={values.location}
-          onChange={handleOnChange}
-          inputProps={{ readOnly: inputDisabled }}
-        />
-        <Controls.Input
-          name="amount"
-          label="Total amount"
-          value={values.amount}
+          name="contactPersonPhone"
+          label="contact person phone"
+          value={values.contactPersonPhone}
           onChange={handleOnChange}
           type="number"
           inputProps={{ readOnly: inputDisabled }}
+          multiline
+          rows={3}
         />
-        {recordForEdit && (
-          <Controls.Select
-            name="status"
-            label="Status"
-            value={values.status}
-            options={statuses}
-            onChange={handleOnChange}
-            inputProps={{ readOnly: inputDisabled }}
-          />
-        )}
+
         <Controls.Button text="Submit" type="submit" disabled={inputDisabled} />
       </Form>
     </div>
   );
-}
+};

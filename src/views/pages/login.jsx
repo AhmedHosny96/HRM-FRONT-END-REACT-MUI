@@ -5,10 +5,12 @@ import {
   Avatar,
   Typography,
   CircularProgress,
+  Link,
 } from "@material-ui/core";
 import { LockOutlined } from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
+import { Snackbar } from "@material-ui/core";
 import brand from "../../../src/www.jpg";
 
 import { Lock, Email } from "@material-ui/icons";
@@ -16,6 +18,7 @@ import Controls from "../controls/controls";
 import { useForm, Form } from "../common/useForm";
 import auth from "../../services/authService";
 import Notifications from "../../views/controls/Notifications";
+import Alert from "@material-ui/lab/Alert";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -57,6 +60,7 @@ const initialValues = {
 };
 
 export default function login(props) {
+  console.log(props.user);
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
 
@@ -76,6 +80,11 @@ export default function login(props) {
     validate
   );
   const [isFetching, setIsFetching] = useState(false);
+  const [alertVisible, setAlertVisible] = useState({
+    open: false,
+    message: "",
+    type: "",
+  });
 
   const [notify, setNotify] = useState({
     isOpen: false,
@@ -90,39 +99,68 @@ export default function login(props) {
     e.preventDefault();
     setIsFetching(true);
 
+    setTimeout(() => {
+      alert("done");
+    }, 1000);
+
     try {
       //
       const { email, password } = { ...values };
       await auth.loginUser(email, password);
-      setIsFetching(true);
       const user = auth.getCurrentUser();
       if (user.firstLogin == 1) {
-        props.history.push(`/change-password/${user.token}`);
+        props.history.push(`/change-password/${user._id}/${user.token}`);
       } else {
         const { state } = props.location;
-        // window.location = state ? state.from.pathname : "/admin/dashboard";
-        props.history.push("/admin/dashboard");
+
+        window.location = state ? state.from.pathname : "/admin/dashboard";
+        // props.history.push("/admin/dashboard");
       }
 
       // if (currentUser.firstLogin === 0) window.location = "/admin/dashboard";
     } catch (ex) {
-      setIsFetching(false);
-      setNotify({
-        isOpen: true,
-        message: ex.response.data,
-        type: "error",
-      });
+      if (ex.response && ex.response.status === 400) {
+        setIsFetching(false);
+        setAlertVisible({
+          open: true,
+          message: ex.response.data,
+          type: "error",
+        });
+      } else {
+        setIsFetching(false);
+
+        setAlertVisible({
+          open: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
     }
   };
+
+  //
+
   //useStyles
   const classes = useStyles();
-
-  // useEffect(() => {}, []);
 
   return (
     <div>
       <Grid container className={classes.container}>
-        <Grid item xs={12} sm={6}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          sx={{
+            backgroundRepeat: "no-repeat",
+            backgroundColor: (t) =>
+              t.palette.mode === "light"
+                ? t.palette.grey[50]
+                : t.palette.grey[900],
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
           <img src={brand} className={classes.brandImage} />
         </Grid>
         <Grid
@@ -133,13 +171,31 @@ export default function login(props) {
           direction="column"
           justify="space-between"
         >
+          <Snackbar
+            open={alertVisible.open}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            onClose={() => setAlertVisible(false)}
+            autoHideDuration={50000}
+          >
+            <Alert severity="error">{alertVisible.message}</Alert>
+          </Snackbar>
+
           <div />
           <div className={classes.inputContainer}>
+            <Grid container justify="center"></Grid>
             <Grid container justify="center">
-              <Avatar sx={{ m: 1, bgcolor: "purple" }}>
-                <LockOutlined />
+              <Avatar
+                style={{
+                  backgroundColor: "darkBlue",
+                  marginBottom: "20px",
+                  width: 56,
+                  height: 56,
+                }}
+              >
+                <LockOutlined fontSize="large" />
               </Avatar>
             </Grid>
+
             <Typography
               component="h1"
               variant="h5"
@@ -147,6 +203,7 @@ export default function login(props) {
             >
               Sign in
             </Typography>
+
             <Form onSubmit={handleSubmit} history={props.history}>
               <Controls.Input
                 autoFocus
@@ -189,11 +246,13 @@ export default function login(props) {
                 />
               ) : (
                 <Controls.Button
-                  text="login"
+                  disabledRipple
+                  text="Sign in"
                   type="submit"
                   disabled={(validate && !values.email) || !values.password}
                 />
               )}
+
               <div style={{ height: 20, marginLeft: "5px" }}>
                 {/* <Button color="default" variant="contained">
                   Rays Microfinance Instituition
@@ -202,13 +261,12 @@ export default function login(props) {
               <Notifications notify={notify} setNotify={setNotify} />
             </Form>
           </div>
-          <div />
-          {/* <Grid item spacing={2}>
-            <Button>Forgot password ?</Button>
-          </Grid>
+
           <Grid item>
-            <Button>Rays microfinance institution</Button>
-          </Grid> */}
+            <Link href="http://www.raysmfi.com" target="_blank" variant="body2">
+              {`Copyright © Rays microfinance institution ${new Date().getFullYear()}`}
+            </Link>
+          </Grid>
         </Grid>
       </Grid>
     </div>

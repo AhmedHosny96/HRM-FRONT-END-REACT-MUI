@@ -7,7 +7,7 @@ export function getEmployees() {
 }
 
 export function getActiveEmployees() {
-  return http.get(API_URL + "/employees/active");
+  return http.get(API_URL + "employees/active");
 }
 
 export function getEmployee(id) {
@@ -28,4 +28,27 @@ export function deleteEmployee(id) {
 
 export function getEmployeeByBranch(id) {
   return http.get(API_URL + "employee/branch/" + id);
+}
+
+// OTHER EMPLOYEE INFO
+
+export function getEmployeesOtherInfo() {
+  return http.get(API_URL + "employee/otherInfo");
+}
+
+export function saveEmployeeOtherInfo(employee) {
+  if (employee._id) {
+    const body = { ...employee };
+    delete body._id;
+    delete body.employee;
+    delete body.createdAt;
+    delete body.updatedAt;
+    delete body.__v;
+    return http.put(API_URL + "employee/otherInfo/" + employee._id, body);
+  }
+  return http.post(API_URL + "employee/otherInfo", employee);
+}
+
+export function deleteEmployeeOtherInfo(id) {
+  return http.delete(API_URL + "employee/otherInfo/" + id);
 }

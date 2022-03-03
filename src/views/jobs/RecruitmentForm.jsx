@@ -111,7 +111,7 @@ export default function RecruitmentForm(props) {
           options={branch}
           onChange={handleOnChange}
           error={errors.department}
-          disabled={inputDisabled}
+          inputProps={{ readOnly: inputDisabled }}
           required
         />
         <Controls.Select
@@ -121,7 +121,7 @@ export default function RecruitmentForm(props) {
           options={job}
           onChange={handleOnChange}
           error={errors.department}
-          disabled={inputDisabled}
+          inputProps={{ readOnly: inputDisabled }}
           required
         />
 
@@ -131,7 +131,7 @@ export default function RecruitmentForm(props) {
           value={values.requiredNumber}
           onChange={handleOnChange}
           error={errors.name}
-          disabled={inputDisabled}
+          inputProps={{ readOnly: inputDisabled }}
           required
         />
         <Controls.Select
@@ -141,7 +141,8 @@ export default function RecruitmentForm(props) {
           options={employmentType}
           onChange={handleOnChange}
           error={errors.department}
-          disabled={inputDisabled}
+          // disabled={inputDisabled}
+          inputProps={{ readOnly: inputDisabled }}
           required
         />
         <Controls.Input
@@ -150,11 +151,10 @@ export default function RecruitmentForm(props) {
           value={values.jobDescription}
           onChange={handleOnChange}
           error={errors.name}
-          type="textArea"
-          disabled={inputDisabled}
           multiline
           rows={2}
           maxRows={4}
+          inputProps={{ readOnly: inputDisabled }}
         />
         {recordForEdit && (
           <Controls.Select
@@ -164,7 +164,7 @@ export default function RecruitmentForm(props) {
             options={statuses}
             onChange={handleOnChange}
             error={errors.department}
-            disabled={inputDisabled}
+            inputProps={{ readOnly: inputDisabled }}
             required
           />
         )}

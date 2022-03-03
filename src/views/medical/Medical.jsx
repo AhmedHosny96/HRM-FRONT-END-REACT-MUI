@@ -8,7 +8,11 @@ import {
 } from "@material-ui/core";
 import MedicalForm from "./MedicalForm.jsx";
 import { makeStyles } from "@material-ui/core/styles";
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ZoomInOutlined,
+} from "@material-ui/icons";
 import Controls from "../controls/controls";
 import Popup from "../controls/Popup";
 import { useTable } from "../common/useTable";
@@ -47,11 +51,12 @@ const headCells = [
   { id: "action", label: "Action", disableSort: true },
 ];
 
-const Medical = () => {
+const Medical = ({ user }) => {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
+  const [inputDisabled, setInputDisabled] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
     isOpen: false,
@@ -100,8 +105,18 @@ const Medical = () => {
     //open in dailog popup
     setOpenPopup(true);
     //stop populating
+    setInputDisabled(false);
   };
+  // view pop up
 
+  const openInPopupView = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
+    //set the fields to read-only
+    setInputDisabled(true);
+  };
   //handle delete
 
   const handleDelete = async (leave) => {
@@ -138,9 +153,21 @@ const Medical = () => {
   };
   // fetching records from DB
   const fetchData = async () => {
-    const { data } = await getMedicals();
-    setIsFetching(false);
-    setRecords(data);
+    try {
+      const { data } = await getMedicals();
+      setIsFetching(false);
+      setRecords(data);
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
+    }
   };
   useEffect(() => {
     setIsFetching(true);
@@ -159,7 +186,7 @@ const Medical = () => {
             onChange={handleSearch}
           />
           <Controls.Button
-            text="+ Medical benefit"
+            text="+ Medical record"
             variant="outlined"
             size="medium"
             className={classes.newButton}
@@ -177,11 +204,9 @@ const Medical = () => {
               <TableRow key={record._id}>
                 <TableCell>{record.name}</TableCell>
                 <TableCell>
-                  {record.allowedFor[1] +
+                  {record.allowedFor[0] +
                     " ," +
-                    record.allowedFor[0] +
-                    " , " +
-                    record.allowedFor[3] +
+                    record.allowedFor[1] +
                     " , " +
                     record.allowedFor[2]}
                 </TableCell>
@@ -190,24 +215,37 @@ const Medical = () => {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInPopupView(record);
                     }}
+                    title="view"
                   >
-                    <EditOutlined />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
                   <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
+                    color="primary"
+                    onClick={() => {
+                      openInPopup(record), console.log(record);
+                    }}
+                    title="update"
                   >
-                    <DeleteOutlined />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -226,6 +264,7 @@ const Medical = () => {
           recordForEdit={recordForEdit}
           setNotify={setNotify}
           postData={postData}
+          inputDisabled={inputDisabled}
         />
       </Popup>
       <Notifications notify={notify} setNotify={setNotify} />

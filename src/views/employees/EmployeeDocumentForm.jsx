@@ -12,6 +12,7 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import app from "./../../services/firebase";
+import Spin from "./../common/useSpin";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,13 +30,14 @@ const initialValues = {
 export default function EmployeeDocumentForm(props) {
   const classes = useStyles();
 
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [attachment, setAttachment] = useState(null);
   const [preview, setPreview] = useState("");
   const [progress, setProgress] = useState(0);
   const [buffer, setBuffer] = useState(10);
 
-  const { postData, recordForEdit, setNotify } = props;
+  const { postData, recordForEdit, setNotify, inputDisabled } = props;
 
   //validation
 
@@ -82,13 +84,21 @@ export default function EmployeeDocumentForm(props) {
       setInputValue(recordForEdit.employee.fullName);
       // preview the document
       setPreview(recordForEdit.attachment);
+      setIsImageLoading(false);
     }
   }, [recordForEdit]);
 
   const handleAttachmentChange = (files) => {
     setAttachment(files[0]);
     //preview the image before upload
-    setPreview(URL.createObjectURL(files[0]));
+
+    if (files[0].type.includes("image")) {
+      setPreview(URL.createObjectURL(files[0]));
+    } else {
+      setPreview("");
+    }
+
+    // console.log(files[0].type);
   };
 
   //saving data to db
@@ -111,9 +121,8 @@ export default function EmployeeDocumentForm(props) {
           details: values.details,
         },
       };
-
-      console.log(metadata);
-      const storageRef = ref(storage, `documents/${fileName}`);
+      // console.log(metadata);
+      const storageRef = ref(storage, `employee documents/${fileName}`);
       const uploadTask = uploadBytesResumable(storageRef, attachment, metadata);
       uploadTask.on(
         "state_changed",
@@ -121,9 +130,7 @@ export default function EmployeeDocumentForm(props) {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setIsFetching(true);
-
-          console.log("Uploading " + progress + " % done ...");
-
+          // console.log("Uploading " + progress + " % done ...");
           setProgress(progress);
         },
         () => {},
@@ -179,6 +186,7 @@ export default function EmployeeDocumentForm(props) {
             onChange={(event, selectedValue) => {
               setValues({ ...values, employeeId: selectedValue._id });
             }}
+            InputProps={{ readOnly: inputDisabled }}
           />
         ) : (
           <Autocomplete
@@ -212,8 +220,8 @@ export default function EmployeeDocumentForm(props) {
           value={values.documentType}
           onChange={handleOnChange}
           error={errors.documentType}
+          InputProps={{ readOnly: inputDisabled }}
         />
-
         <Controls.Input
           name="details"
           label="Detail info"
@@ -221,32 +229,30 @@ export default function EmployeeDocumentForm(props) {
           onChange={handleOnChange}
           error={errors.details}
           multiline
-          rows={2}
-          maxRows={4}
+          rows={4}
+          maxRows={10}
+          InputProps={{ readOnly: inputDisabled }}
         />
-
-        <Controls.Input
-          name="attachment"
-          type="file"
-          filena
-          onChange={(e) => handleAttachmentChange(e.target.files)}
-          error={errors.attachment}
-          required="false"
-        />
-
-        {!isFetching && (
-          <Controls.Button text="Submit" type="submit"></Controls.Button>
+        {!inputDisabled && (
+          <Controls.Input
+            name="attachment"
+            type="file"
+            filena
+            onChange={(e) => handleAttachmentChange(e.target.files)}
+            error={errors.attachment}
+            required="false"
+            InputProps={{ readOnly: inputDisabled }}
+          />
         )}
-        {isFetching && (
-          <Controls.Button
-            text="Submit"
-            type="submit"
-            endIcon={<CircularProgress size={20} />}
-            disabled={isFetching}
-          ></Controls.Button>
-        )}
+        <Controls.Button
+          text="Submit"
+          type="submit"
+          endIcon={isFetching && <CircularProgress size={20} />}
+          disabled={isFetching || inputDisabled}
+        ></Controls.Button>
         <br />
-        <img id="img-preview" src={preview} />
+
+        {isImageLoading ? <Spin /> : <img id="img-preview" src={preview} vis />}
       </Form>
     </div>
   );

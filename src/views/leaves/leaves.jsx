@@ -46,10 +46,10 @@ const headCells = [
   { id: "leaveGroup", label: "Allowed for" },
   { id: "action", label: "Action", disableSort: true },
 ];
-export default function leaves() {
+export default function leaves({ user }) {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
-  0;
+
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [isFetching, setIsFetching] = useState(false);
@@ -139,9 +139,21 @@ export default function leaves() {
   };
   // fetching records from DB
   const fetchData = async () => {
-    const { data } = await getLeaves();
-    setIsFetching(false);
-    setRecords(data);
+    try {
+      const { data } = await getLeaves();
+      setIsFetching(false);
+      setRecords(data);
+    } catch (err) {
+      if (err.response && err.response.status >= 404) {
+      } else {
+        setNotify({
+          isOpen: true,
+          message:
+            "Unexpected error occurred ,  Please Contact your system Admin. !",
+          type: "error",
+        });
+      }
+    }
   };
   useEffect(() => {
     setIsFetching(true);
@@ -186,22 +198,26 @@ export default function leaves() {
                     onClick={() => {
                       openInPopup(record), console.log(record);
                     }}
+                    title="edit"
                   >
-                    <EditOutlined />
+                    <EditOutlined fontSize="small" />
                   </Controls.ActionButton>
-                  <Controls.ActionButton
-                    color="secondary"
-                    onClick={() =>
-                      setConfirmDialog({
-                        isOpen: true,
-                        title: "Are you sure you want to delete this ?",
-                        subTitle: "",
-                        onConfirm: () => handleDelete(record),
-                      })
-                    }
-                  >
-                    <DeleteOutlined />
-                  </Controls.ActionButton>
+                  {user && user.role === "Admin" && (
+                    <Controls.ActionButton
+                      color="secondary"
+                      onClick={() =>
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: "Are you sure you want to delete this ?",
+                          subTitle: "",
+                          onConfirm: () => handleDelete(record),
+                        })
+                      }
+                      title="delete"
+                    >
+                      <DeleteOutlined fontSize="small" />
+                    </Controls.ActionButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

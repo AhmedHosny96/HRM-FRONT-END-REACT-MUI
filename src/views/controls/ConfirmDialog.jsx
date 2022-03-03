@@ -7,6 +7,7 @@ import {
   Typography,
   Slide,
   CircularProgress,
+  ClickAwayListener,
 } from "@material-ui/core";
 import Controls from "../../views/controls/controls";
 import { makeStyles } from "@material-ui/core/styles";
