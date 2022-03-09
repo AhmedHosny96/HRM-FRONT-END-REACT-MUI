@@ -54,8 +54,7 @@ const headCells = [
   { id: "action", label: "Action", disableSort: true },
 ];
 
-export default function Jobs({ user, socket }) {
-  console.log(socket, user);
+export default function Jobs({ user }) {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -230,7 +229,7 @@ export default function Jobs({ user, socket }) {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInPopup(record)
                     }}
                     title="edit"
                   >

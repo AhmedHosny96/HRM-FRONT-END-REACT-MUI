@@ -218,13 +218,14 @@ const Medical = ({ user }) => {
                       openInPopupView(record);
                     }}
                     title="view"
+                    
                   >
                     <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInPopup(record) 
                     }}
                     title="update"
                   >
@@ -256,7 +257,7 @@ const Medical = ({ user }) => {
         <Pagination />
       </Paper>
       <Popup
-        title="leave request "
+        title="medical record "
         openPopup={openPopup}
         setOpenPopup={setOpenPopup}
       >

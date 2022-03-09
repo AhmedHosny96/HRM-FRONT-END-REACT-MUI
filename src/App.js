@@ -5,23 +5,15 @@ import RTL from "layouts/RTL.js";
 import Login from "./views/pages/login.jsx";
 import auth from "./services/authService";
 import "assets/css/material-dashboard-react.css?v=1.10.0";
-import { io } from "socket.io-client";
 import ProtectedRoute from "./views/common/ProtectedRoute";
 import ChangePassword from "./views/pages/changePassword";
 import { useIdleTimer } from "react-idle-timer";
 import { NotFound } from "views/common/NotFound.jsx";
 const App = () => {
   const [user, setUser] = useState("");
-  const [socket, setSocket] = useState(null);
 
   const handleOnIdle = (event) => {
-    console.log("last active", getLastActiveTime());
     auth.logout();
-  };
-
-  const handleOnActive = (event) => {
-    // console.log("user is active", event);
-    // console.log("time remaining", getRemainingTime());
   };
 
   useEffect(() => {
@@ -29,31 +21,20 @@ const App = () => {
     // setSocket(io("http://localhost:8900"));
   }, []);
 
-  useEffect(() => {
-    // socket?.emit("newUser", user);
-    // console.log(user);
-  }, [user]);
-
   // logout timer
 
-  const { getRemainingTime, getLastActiveTime } = useIdleTimer({
+  const {} = useIdleTimer({
     timeout: 1000 * 60 * 5,
     onIdle: handleOnIdle,
-    onActive: handleOnActive,
     debounce: 500,
   });
-
-  console.log(process.env.REACT_APP_PUBLIC_URL);
-
-  //TODO: render user
-  //: render user
 
   return (
     <React.Fragment>
       <Switch>
         <ProtectedRoute
           path={`/admin`}
-          render={(props) => <Admin {...props} user={user} socket={socket} />}
+          render={(props) => <Admin {...props} user={user} />}
         />
         <Route
           path="/login"
@@ -65,7 +46,7 @@ const App = () => {
           path={"/change-password/:id/:token"}
           exact
           render={(props) => {
-            if (user) {
+            if (user && user.firstLogin == 0) {
               return (
                 <Redirect
                   to={{
@@ -80,6 +61,7 @@ const App = () => {
         />
 
         <Route path="/rtl" component={RTL} />
+
         <Redirect from="/" to="/admin/dashboard" exact />
         <Redirect from="*" to="/not-found" />
       </Switch>

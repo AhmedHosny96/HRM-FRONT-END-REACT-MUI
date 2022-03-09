@@ -14,10 +14,6 @@ const MedicalRecords = ({ user }) => {
       label: "Medical expense request",
       Component: <MedicalRequests user={user} />,
     },
-    {
-      label: "Other information",
-      Component: <p>hi</p>,
-    },
   ];
   return <Tabs tabs={tabs} />;
 };

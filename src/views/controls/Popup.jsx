@@ -30,7 +30,7 @@ export default function Popup(props) {
     <Dialog open={openPopup} className={classes.dialogWrapper}>
       <DialogTitle>
         <div style={{ display: "flex" }}>
-          <Typography variant="h8" component="div" style={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
             {title}
           </Typography>
           <Controls.ActionButton
@@ -47,4 +47,3 @@ export default function Popup(props) {
     </Dialog>
   );
 }
-Popup.PropTypes = {};

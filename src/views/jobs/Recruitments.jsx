@@ -95,7 +95,6 @@ export default function Recruitments({ user, socket }) {
   const getAdminUser = () => {
     getAdminUsers().then((data) => setAdminUser(data.data[0]));
   };
-  console.log(adminUser.username);
   useEffect(() => {
     setIsFetching(true);
     fetchData();

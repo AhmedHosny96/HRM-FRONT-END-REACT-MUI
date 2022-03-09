@@ -20,7 +20,7 @@ export default function Footer() {
           <span>
             &copy; {1900 + new Date().getYear()}{" "}
             <a
-              href="https://www.raysmfi.com"
+              href={process.env.REACT_APP_RAYSMFIWEBSITE}
               target="_blank"
               className={classes.a}
             >

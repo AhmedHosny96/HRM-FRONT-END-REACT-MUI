@@ -4,7 +4,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useForm, Form } from "../common/useForm";
 import Controls from "../../views/controls/controls";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Gender, statuses, patient } from "../../views/common/dropDownValues";
+import {
+  Gender,
+  medicalStatus,
+  patient,
+} from "../../views/common/dropDownValues";
 import {
   getActiveEmployees,
   getEmployees,
@@ -120,7 +124,7 @@ export default function MedicalRequestForm(props) {
           <Autocomplete
             disablePortal
             id="employeeId"
-            options={employee}
+            options={[employee]}
             size="small"
             inputValue={inputValue}
             sx={{ width: 300 }}
@@ -252,7 +256,7 @@ export default function MedicalRequestForm(props) {
             name="status"
             label="Status"
             value={values.status}
-            options={statuses}
+            options={medicalStatus}
             onChange={handleOnChange}
             inputProps={{ readOnly: inputDisabled }}
           />

@@ -12,7 +12,7 @@ import routes from "routes.js";
 
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
-import bgImage from "assets/img/backgroundcolor.jpg";
+import bgImage from "assets/img/sidebar-4.jpg";
 import logo from "assets/img/rays.PNG";
 
 const useStyles = makeStyles(styles);
@@ -62,29 +62,7 @@ export default function Admin({ user }, { ...rest }) {
   const getRoute = () => {
     return window.location.pathname !== "/admin/maps";
   };
-  // const resizeFunction = () => {
-  //   if (window.innerWidth >= 960) {
-  //     setMobileOpen(false);
-  //   }
-  // };
-  // initialize and destroy the PerfectScrollbar plugin
-  // React.useEffect(() => {
-  //   if (navigator.platform.indexOf("Win") > -1) {
-  //     ps = new PerfectScrollbar(mainPanel.current, {
-  //       suppressScrollX: true,
-  //       suppressScrollY: false,
-  //     });
-  //     document.body.style.overflow = "hidden";
-  //   }
-  //   window.addEventListener("resize", resizeFunction);
-  //   // Specify how to clean up after this effect:
-  //   return function cleanup() {
-  //     if (navigator.platform.indexOf("Win") > -1) {
-  //       ps.destroy();
-  //     }
-  //     window.removeEventListener("resize", resizeFunction);
-  //   };
-  // }, [mainPanel]);
+
   return (
     <div className={classes.wrapper}>
       <Sidebar

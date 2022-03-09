@@ -237,7 +237,6 @@ export default function EmployeeDocumentForm(props) {
           <Controls.Input
             name="attachment"
             type="file"
-            filena
             onChange={(e) => handleAttachmentChange(e.target.files)}
             error={errors.attachment}
             required="false"
@@ -252,7 +251,7 @@ export default function EmployeeDocumentForm(props) {
         ></Controls.Button>
         <br />
 
-        {isImageLoading ? <Spin /> : <img id="img-preview" src={preview} vis />}
+        {isImageLoading ? <Spin /> : <img id="img-preview" src={preview} />}
       </Form>
     </div>
   );

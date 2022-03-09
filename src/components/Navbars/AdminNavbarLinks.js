@@ -64,8 +64,6 @@ export default function AdminNavbarLinks({ user, socket }) {
     });
   }, [socket]);
 
-  console.log(notifications.message);
-
   return (
     <div>
       {/* <div className={classes.searchWrapper}>

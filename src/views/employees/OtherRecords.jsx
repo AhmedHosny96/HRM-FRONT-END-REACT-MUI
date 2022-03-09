@@ -57,7 +57,6 @@ const headCells = [
 ];
 
 export default function OtherRecords({ user }) {
-  console.log(user);
   const classes = useStyles();
   const [inputDisabled, setInputDisabled] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -218,12 +217,12 @@ export default function OtherRecords({ user }) {
                 <TableCell>
                   {record.contactPersonName.length > 12
                     ? record.contactPersonName.slice(0, 11) + "..."
-                    : ""}
+                    : record.contactPersonName}
                 </TableCell>
                 <TableCell>
                   {record.contactPersonPhone.length > 13
                     ? record.contactPersonPhone.slice(0, 12) + "..."
-                    : ""}
+                    : record.contactPersonPhone}
                 </TableCell>
 
                 <TableCell>

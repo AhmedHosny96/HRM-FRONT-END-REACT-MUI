@@ -55,7 +55,6 @@ const headCells = [
 ];
 
 export default function Employees({ user }) {
-  console.log(user);
   const classes = useStyles();
   const [isFetching, setIsFetching] = useState(false);
   const [records, setRecords] = useState([]);
@@ -217,6 +216,7 @@ export default function Employees({ user }) {
                 <TableCell
                   style={{
                     color: record.status === "Active" ? "blue" : "red",
+                    fontWeight: "500",
                   }}
                 >
                   {record.status}

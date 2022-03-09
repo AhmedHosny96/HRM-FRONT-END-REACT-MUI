@@ -22,9 +22,8 @@ const initialValues = {
   employmentStatus: "",
   startDate: new Date(),
   status: "Active",
-  attachment: "",
-  branch: [],
-  job: [],
+  term: "",
+  startDate: new Date(),
 };
 
 export default function employeeForm(props) {
@@ -77,10 +76,7 @@ export default function employeeForm(props) {
   const populateValues = async () => {
     const { data: branch } = await getActiveBranches();
     const { data: jobs } = await getJobs();
-
     setBranches(branch);
-
-    console.log(branch);
     setJobs(jobs);
   };
 
@@ -104,7 +100,6 @@ export default function employeeForm(props) {
     if (validate()) {
       try {
         await postData(values);
-        console.log(values);
       } catch (error) {}
     }
   };
@@ -210,21 +205,26 @@ export default function employeeForm(props) {
         />
       )}
 
-      {/* {[
-        values.status === "Contract terminated" ||
-        values.status === "Resigned" ? (
+      {[
+        values.employmentStatus.includes("contract") && [
           <Controls.Input
-            name="attachment"
-            value={values.attachment}
+            name="term"
+            label="Term"
+            placeholder="term in months"
+            value={values.term}
             onChange={handleOnChange}
-            // error={errors.status}
-            type="file"
+            error={errors.term}
             required
-          />
-        ) : (
-          ""
-        ),
-      ]} */}
+          />,
+          <Controls.Date
+            name="expirationDate"
+            label="Expiration date"
+            value={values.expirationDate}
+            onChange={handleOnChange}
+            required
+          />,
+        ],
+      ]}
 
       <Controls.Button
         text={recordForEdit ? "Update" : "Submit"}

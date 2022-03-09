@@ -83,7 +83,7 @@ export default function userForm(props) {
           <Autocomplete
             disablePortal
             id="employeeId"
-            options={employee}
+            options={[employee]}
             noOptionsText="No employee data"
             size="small"
             inputValue={inputValue}

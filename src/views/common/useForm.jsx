@@ -22,29 +22,14 @@ export function useForm(initialValues, validateOnChange = false, validate) {
     if (validateOnChange) validate({ [name]: value });
   };
 
-  // const handleSelectWithValueChange = (e) => {
-  //   const { name, value } = e.target;
-  //   const selectedBranch = branches.filter((branch) => branch._id == value)[0];
-  //   // console.log(selectedBranch[0]);
-
-  //   setValues({
-  //     ...values,
-  //     ...selectBranch,
-  //     [name]: value,
-  //   });
-  //   // console.log(values);
-  //   if (validateOnChange) validate({ [name]: value });
-  // };
-
+ 
   return {
     values,
     setValues,
     errors,
     setErrors,
     handleOnChange,
-    // branches,
-    // setBranches,
-    // handleSelectWithValueChange,
+
   };
 }
 
@@ -68,6 +53,6 @@ export function Form(props) {
   );
 }
 
-Form.propTypes = {
-  children: PropTypes.object.isRequired,
-};
+// Form.propTypes = {
+//   children: PropTypes.object.isRequired,
+// };

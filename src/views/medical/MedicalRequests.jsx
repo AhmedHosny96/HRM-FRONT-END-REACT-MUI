@@ -39,9 +39,6 @@ const useStyles = makeStyles((theme) => ({
   newButton: {
     marginRight: theme.spacing(6),
     textTransform: "none",
-
-    // backgroundColor: "purple",
-    // color: "white",
   },
 }));
 const headCells = [
@@ -55,8 +52,7 @@ const headCells = [
   { id: "action", label: "Action", disableSort: true },
 ];
 
-const MedicalRequests = ({ user, socket }) => {
-  console.log(socket);
+const MedicalRequests = ({ user }) => {
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -224,7 +220,17 @@ const MedicalRequests = ({ user, socket }) => {
                     ? record.createdAt.slice(0, 10)
                     : ""}
                 </TableCell>
-                <TableCell>{record.status}</TableCell>
+                <TableCell
+                  style={{
+                    color:
+                      (record.status == "Pending" && "greenYellow") ||
+                      (record.status == "Paid" && "darkBlue") ||
+                      (record.status == "Cancelled" && "red"),
+                    fontWeight: "bold",
+                  }}
+                >
+                  {record.status}
+                </TableCell>
                 <TableCell>
                   <Controls.ActionButton
                     color="primary"

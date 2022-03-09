@@ -60,7 +60,6 @@ const headCells = [
 ];
 
 export default function Branches({ user }) {
-  console.log(user);
   const classes = useStyles();
   const [isFetching, setIsFetching] = useState(false);
 

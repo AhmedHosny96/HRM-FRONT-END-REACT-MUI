@@ -27,8 +27,8 @@ export default function Select(props) {
       >
         <MenuItem value=""></MenuItem>
         {options.map((option) => (
-          <MenuItem key={option._id || option.id} value={option._id || option}>
-            {option.name || option}
+          <MenuItem key={option._id || option.id} value={option._id || option || [option] }>
+            {option.name  || option}
           </MenuItem>
         ))}
       </MuiSelect>
@@ -38,10 +38,9 @@ export default function Select(props) {
 }
 
 Select.propTypes = {
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
   label: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.object.isRequired,
-  options: PropTypes.object.isRequired,
-  error: PropTypes.object.isRequired,
+  // value: PropTypes.string,
+  // onChange: PropTypes.function,
+  error: PropTypes.string
 };

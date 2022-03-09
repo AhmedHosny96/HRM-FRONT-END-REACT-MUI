@@ -21,6 +21,13 @@ export function saveUser(user) {
   // return http.post(API_URL + "/" + id + "/" + token, user) || http.post(API_URL, user);
   return http.post(API_URL + "auth/create", user);
 }
+
+// reset user password
+
+export function resetPassword(id) {
+  return http.post(API_URL + "auth/reset-password/" + id);
+}
+
 //fetching all users
 
 export function getUsers() {

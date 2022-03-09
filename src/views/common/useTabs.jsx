@@ -24,7 +24,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography component={'span'}> {children}</Typography>
         </Box>
       )}
     </div>
@@ -49,7 +49,7 @@ export default function UseTabs({ tabs, user, socket }) {
           aria-label="basic tabs example"
           textColor="primary"
           indicatorColor="primary"
-          wrapped
+          wrapped ={value ? 1 : 0}
         >
           {tabs.map(({ label }, i) => (
             <Tab label={label} key={i} className={classes.tabText} />
@@ -57,7 +57,7 @@ export default function UseTabs({ tabs, user, socket }) {
         </Tabs>
       </Box>
       {tabs.map(({ Component }, i) => (
-        <TabPanel value={value} index={i} key={i} user={user} socket={socket}>
+        <TabPanel value={value} index={i} key={i} user={user} >
           {Component}
         </TabPanel>
       ))}

@@ -209,7 +209,7 @@ export default function leaves({ user }) {
                 <TableCell>
                   {record.employee.fullName.length > 11
                     ? record.employee.fullName.slice(0, 11) + "..."
-                    : ""}
+                    : record.employee.fullName}
                 </TableCell>
                 <TableCell>{record.employee.branch.name}</TableCell>
                 <TableCell>{record.leave.leaveType}</TableCell>
@@ -224,7 +224,17 @@ export default function leaves({ user }) {
                     : ""}
                 </TableCell>
                 <TableCell>{record.requestedDays}</TableCell>
-                <TableCell>{record.status}</TableCell>
+                <TableCell
+                  style={{
+                    color:
+                      (record.status == "Pending" && "greenYellow") ||
+                      (record.status == "Approved" && "darkBlue") ||
+                      (record.status == "Cancelled" && "red"),
+                    fontWeight: "450",
+                  }}
+                >
+                  {record.status}
+                </TableCell>
                 <TableCell>
                   {/* <Controls.ActionButton
                     color="primary"

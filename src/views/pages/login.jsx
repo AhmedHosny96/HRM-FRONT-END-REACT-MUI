@@ -60,7 +60,6 @@ const initialValues = {
 };
 
 export default function login(props) {
-  console.log(props.user);
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
 
@@ -99,17 +98,13 @@ export default function login(props) {
     e.preventDefault();
     setIsFetching(true);
 
-    setTimeout(() => {
-      alert("done");
-    }, 1000);
-
     try {
       //
       const { email, password } = { ...values };
       await auth.loginUser(email, password);
       const user = auth.getCurrentUser();
       if (user.firstLogin == 1) {
-        props.history.push(`/change-password/${user._id}/${user.token}`);
+        props.history.push(`/change-password/${user._id}/${user.iat}`);
       } else {
         const { state } = props.location;
 
@@ -120,6 +115,13 @@ export default function login(props) {
       // if (currentUser.firstLogin === 0) window.location = "/admin/dashboard";
     } catch (ex) {
       if (ex.response && ex.response.status === 400) {
+        setIsFetching(false);
+        setAlertVisible({
+          open: true,
+          message: ex.response.data,
+          type: "error",
+        });
+      } else if (ex.response && ex.response.status === 403) {
         setIsFetching(false);
         setAlertVisible({
           open: true,
@@ -147,20 +149,7 @@ export default function login(props) {
   return (
     <div>
       <Grid container className={classes.container}>
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          sx={{
-            backgroundRepeat: "no-repeat",
-            backgroundColor: (t) =>
-              t.palette.mode === "light"
-                ? t.palette.grey[50]
-                : t.palette.grey[900],
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
+        <Grid item xs={12} sm={6}>
           <img src={brand} className={classes.brandImage} />
         </Grid>
         <Grid
@@ -182,7 +171,6 @@ export default function login(props) {
 
           <div />
           <div className={classes.inputContainer}>
-            <Grid container justify="center"></Grid>
             <Grid container justify="center">
               <Avatar
                 style={{
@@ -246,7 +234,6 @@ export default function login(props) {
                 />
               ) : (
                 <Controls.Button
-                  disabledRipple
                   text="Sign in"
                   type="submit"
                   disabled={(validate && !values.email) || !values.password}
@@ -262,8 +249,12 @@ export default function login(props) {
             </Form>
           </div>
 
-          <Grid item>
-            <Link href="http://www.raysmfi.com" target="_blank" variant="body2">
+          <Grid item sm="auto" xs="auto">
+            <Link
+              href={process.env.REACT_APP_RAYSMFIWEBSITE}
+              target="_blank"
+              variant="body2"
+            >
               {`Copyright © Rays microfinance institution ${new Date().getFullYear()}`}
             </Link>
           </Grid>

@@ -23,6 +23,6 @@ export default function useInput(props) {
 }
 
 useInput.propTypes = {
-  name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
+  name: PropTypes.string,
+  label: PropTypes.string,
 };

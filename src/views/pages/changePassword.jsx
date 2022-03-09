@@ -93,7 +93,6 @@ export default function ChangePassword(props) {
       try {
         const id = props.match.params.id;
         const password = { ...values };
-        console.log(password);
         await auth.changePassword(id, password);
         //
         setIsFetching(true);
@@ -104,26 +103,15 @@ export default function ChangePassword(props) {
           message: "User verified successfully",
           type: "success",
         });
-        // logout
       } catch (ex) {
-        //   setNotify({
-        //     isOpen: true,
-        //     message: ex.response.data,
-        //     type: "error",
-        //   });
+        setNotify({
+          isOpen: true,
+          message: ex.response.data,
+          type: "error",
+        });
       }
     }
   };
-
-  //useStyles
-
-  //   else {
-  //     setNotify({
-  //       isOpen: true,
-  //       message: "SERVER ERROR - please contact your sytem admin !",
-  //       type: "error",
-  //     });
-  //   }
 
   const classes = useStyles();
 
@@ -141,13 +129,23 @@ export default function ChangePassword(props) {
           direction="column"
           justify="space-between"
         >
-          <Alert variant="outlined" severity="info">
+          <Alert
+            variant="outlined"
+            severity="info"
+            style={{ marginTop: "20px" }}
+          >
             <div />
-            Its your first login to verify your account please create new
-            password!
+            To login please create new password for your account.
           </Alert>
           <div item>
-            <Avatar sx={{ m: 1 }}>
+            <Avatar
+              style={{
+                backgroundColor: "darkBlue",
+                marginBottom: "20px",
+                width: 56,
+                height: 56,
+              }}
+            >
               <VpnKeyTwoTone />
             </Avatar>
           </div>
@@ -178,15 +176,11 @@ export default function ChangePassword(props) {
                 error={errors.confirmPassword}
               />
 
-              {isFetching ? (
-                <Controls.Button
-                  text={<CircularProgress size={20} />}
-                  disabled={isFetching}
-                  type="submit"
-                />
-              ) : (
-                <Controls.Button text="change password" type="submit" />
-              )}
+              <Controls.Button
+                text="change password"
+                type="submit"
+                disabled={!errors}
+              />
 
               <div style={{ height: 20, marginLeft: "5px" }}>
                 {/* <Button color="default" variant="contained">

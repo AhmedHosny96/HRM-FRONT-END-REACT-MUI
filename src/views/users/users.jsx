@@ -10,7 +10,12 @@ import {
 import UserForm from "./userForm";
 import Controls from "../../views/controls/controls";
 import { useTable } from "views/common/useTable";
-import { getUsers, saveUser, deleteUser } from "./../../services/userService";
+import {
+  getUsers,
+  saveUser,
+  deleteUser,
+  resetPassword,
+} from "./../../services/userService";
 import Popup from "../../views/controls/Popup";
 import Notifications from "../../views/controls/Notifications";
 import {
@@ -54,7 +59,6 @@ const headCells = [
 ];
 
 export default function Users({ user }) {
-  console.log(user);
   const classes = useStyles();
   const [records, setRecords] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -127,6 +131,25 @@ export default function Users({ user }) {
     fetchData();
   };
 
+  // password reset
+
+  const handleReset = async (user) => {
+    setConfirmDialog({
+      ...confirmDialog,
+      isOpen: false,
+    });
+    records.filter((u) => u._id != user._id);
+
+    await resetPassword(user._id);
+
+    setNotify({
+      isOpen: true,
+      message: `reset link sent to ${user.email}`,
+      type: "success",
+    });
+    fetchData();
+  };
+
   const postData = async (user) => {
     const data = { ...user };
     // save the user to db
@@ -135,7 +158,7 @@ export default function Users({ user }) {
     setOpenPopup(false);
     // notify sucess
 
-    if (user.email) {
+    if (user.status && user) {
       setNotify({
         isOpen: true,
         message: ` One-time password  is sent to - ${user.email}`,
@@ -217,7 +240,17 @@ export default function Users({ user }) {
                 <TableCell>{record.username}</TableCell>
                 <TableCell>{record.email}</TableCell>
                 <TableCell>{record.role}</TableCell>
-                <TableCell>{record.status}</TableCell>
+                <TableCell
+                  style={{
+                    color:
+                      (record.status == "Not verified" && "greenYellow") ||
+                      (record.status == "Active" && "darkBlue") ||
+                      (record.status == "Deactivated" && "red"),
+                    fontWeight: "450",
+                  }}
+                >
+                  {record.status}
+                </TableCell>
                 <TableCell>
                   {user && user.role === "Admin" && (
                     <Controls.ActionButton
@@ -229,7 +262,7 @@ export default function Users({ user }) {
                           title: `Are you sure you want to reset ${record.employee.fullName}'s password ?`,
                           subTitle: "",
                           text: "send",
-                          onConfirm: () => handleDelete(record),
+                          onConfirm: () => handleReset(record),
                         })
                       }
                     >
@@ -251,7 +284,6 @@ export default function Users({ user }) {
 
                   {user && user.role === "Admin" && (
                     <Controls.ActionButton
-                      color="secondary"
                       color="secondary"
                       onClick={() =>
                         setConfirmDialog({

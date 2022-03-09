@@ -110,7 +110,7 @@ export default function jobForm(props) {
           inputProps={{ readOnly: inputDisabled }}
           multiline
           rows={3}
-          maxRows={4}
+          maxrows={4}
         />
         <Controls.Input
           name="qualification"
@@ -121,7 +121,7 @@ export default function jobForm(props) {
           inputProps={{ readOnly: inputDisabled }}
           multiline
           rows={3}
-          maxRows={4}
+          maxrows={4}
         />
         <Controls.Select
           name="department"
