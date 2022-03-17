@@ -15,6 +15,7 @@ export function saveUser(user) {
     delete body._id;
     delete body.password;
     delete body.firstLogin;
+    delete body.token;
     delete body.__v;
     return http.put(API_URL + "users/" + user._id, body);
   }

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
 
 import { makeStyles } from "@material-ui/core";
 
@@ -22,14 +21,12 @@ export function useForm(initialValues, validateOnChange = false, validate) {
     if (validateOnChange) validate({ [name]: value });
   };
 
- 
   return {
     values,
     setValues,
     errors,
     setErrors,
     handleOnChange,
-
   };
 }
 

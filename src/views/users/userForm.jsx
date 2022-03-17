@@ -98,7 +98,7 @@ export default function userForm(props) {
               />
             )}
             onChange={(event, selectedValue) => {
-              setValues({ employeeId: selectedValue._id });
+              setValues({ employeeId: selectedValue?._id });
             }}
           />
         ) : (
@@ -119,7 +119,7 @@ export default function userForm(props) {
               />
             )}
             onChange={(event, selectedValue) => {
-              setValues({ employeeId: selectedValue._id });
+              setValues({ employeeId: selectedValue?._id });
             }}
           />
         )}

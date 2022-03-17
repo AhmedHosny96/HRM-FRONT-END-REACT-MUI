@@ -153,27 +153,32 @@ export default function Users({ user }) {
   const postData = async (user) => {
     const data = { ...user };
     // save the user to db
-    await saveUser(data);
-    //close the pop up
-    setOpenPopup(false);
-    // notify sucess
 
-    if (user.status && user) {
+    try {
+      const response = await saveUser(data);
+
+      if (response.status === 201) {
+        setNotify({
+          isOpen: true,
+          message: ` User created successfully, One-time password  is sent to - ${user.email}`,
+          type: "success",
+        });
+      } else {
+        setNotify({
+          isOpen: true,
+          message: `successfull !`,
+          type: "success",
+        });
+      }
+      setOpenPopup(false);
+      fetchData();
+    } catch (ex) {
       setNotify({
         isOpen: true,
-        message: ` One-time password  is sent to - ${user.email}`,
-        type: "success",
-      });
-    } else {
-      setNotify({
-        isOpen: true,
-        message: ` Successfull`,
+        message: ex.response.data,
         type: "success",
       });
     }
-    // refresh the table
-
-    fetchData();
   };
 
   // fetching data into table

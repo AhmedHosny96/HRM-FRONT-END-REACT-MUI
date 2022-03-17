@@ -30,6 +30,7 @@ import {
 import Notifications from "views/controls/Notifications";
 import Spin from "./../common/useSpin";
 import app from "./../../services/firebase";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
   pageContent: {
@@ -98,8 +99,8 @@ export default function EmployeeDocuments({ user }) {
   // posting and update data into db for branchesform
   const postData = async (document) => {
     try {
-      const data = { ...document };
-      await saveDocument(data);
+      await saveDocument(document);
+
       setOpenPopup(false);
 
       setNotify({
@@ -119,6 +120,7 @@ export default function EmployeeDocuments({ user }) {
         });
       }
     }
+    setIsFetching(false);
   };
 
   //handling search
@@ -150,22 +152,17 @@ export default function EmployeeDocuments({ user }) {
     });
     records.filter((b) => b._id != document._id);
 
-    const storage = getStorage(app);
-    //image reference storage: firebase , url : mongodb
-    const imageRef = ref(storage, document.attachment);
+    // const storage = getStorage(app);
+    // //image reference storage: firebase , url : mongodb
+    // const imageRef = ref(storage, document.attachment);
     // delete
-    await deleteObject(imageRef)
-      .then(() => {
-        deleteDocument(document._id);
-        setNotify({
-          isOpen: true,
-          message: "Deleted Successfully!",
-          type: "error",
-        });
-      })
-      .catch((err) => {
-        alert("error occured" + err);
-      });
+
+    await deleteDocument(document._id);
+    setNotify({
+      isOpen: true,
+      message: "Deleted Successfully!",
+      type: "error",
+    });
     fetchData();
   };
 
@@ -243,7 +240,10 @@ export default function EmployeeDocuments({ user }) {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      window.open(record.attachment, "_blank");
+                      window.open(
+                        `${process.env.PUBLIC_URL}/employee_documents/${record.attachment}`,
+                        "_blank"
+                      );
                     }}
                     title="download file"
                   >
@@ -288,6 +288,7 @@ export default function EmployeeDocuments({ user }) {
           recordForEdit={recordForEdit}
           setNotify={setNotify}
           inputDisabled={inputDisabled}
+          setOpenPopup={setOpenPopup}
           // isImageFetching={isImageFetching}
           // setisImageFetching={setisImageFetching}
         />

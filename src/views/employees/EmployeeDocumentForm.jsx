@@ -13,6 +13,8 @@ import {
 } from "firebase/storage";
 import app from "./../../services/firebase";
 import Spin from "./../common/useSpin";
+import axios from "axios";
+import { TextFieldsTwoTone } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -83,13 +85,18 @@ export default function EmployeeDocumentForm(props) {
       // populate auto select value
       setInputValue(recordForEdit.employee.fullName);
       // preview the document
-      setPreview(recordForEdit.attachment);
+      setPreview(
+        `${process.env.PUBLIC_URL}/employee_documents/${recordForEdit.attachment}`
+      );
       setIsImageLoading(false);
     }
   }, [recordForEdit]);
 
   const handleAttachmentChange = (files) => {
-    setAttachment(files[0]);
+    setValues({
+      ...values,
+      attachment: files[0],
+    });
     //preview the image before upload
 
     if (files[0].type.includes("image")) {
@@ -106,52 +113,17 @@ export default function EmployeeDocumentForm(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setPreview(null);
+    const formData = new FormData();
+    const { employeeId, documentType, details, attachment } = values;
 
-    const fileName = new Date().getTime() + attachment.name;
-    const storage = getStorage(app);
+    formData.append("employeeId", employeeId);
+    formData.append("documentType", documentType);
+    formData.append("details", details);
+    formData.append("attachment", attachment, attachment.name);
+
     try {
-      // get employee name
-
-      //TODO: get employee name
-      const metadata = {
-        customMetadata: {
-          employeeId: values.employeeId,
-          documentType: values.documentType,
-          details: values.details,
-        },
-      };
-      // console.log(metadata);
-      const storageRef = ref(storage, `employee documents/${fileName}`);
-      const uploadTask = uploadBytesResumable(storageRef, attachment, metadata);
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setIsFetching(true);
-          // console.log("Uploading " + progress + " % done ...");
-          setProgress(progress);
-        },
-        () => {},
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadLink) => {
-            // setImageUrl(downloadLink);
-            setAttachment(downloadLink);
-            const fields = { ...values, attachment: downloadLink };
-            postData(fields);
-
-            setIsFetching(false);
-          });
-        }
-      );
-    } catch (ex) {
-      setNotify({
-        isOpen: true,
-        message: ex,
-        type: "error",
-      });
-    }
+      await postData(formData);
+    } catch (err) {}
   };
 
   return (
@@ -184,7 +156,7 @@ export default function EmployeeDocumentForm(props) {
               />
             )}
             onChange={(event, selectedValue) => {
-              setValues({ ...values, employeeId: selectedValue._id });
+              setValues({ ...values, employeeId: selectedValue?._id });
             }}
             InputProps={{ readOnly: inputDisabled }}
           />
@@ -209,7 +181,7 @@ export default function EmployeeDocumentForm(props) {
             onChange={(event, selectedValue) => {
               setValues({
                 ...values,
-                employeeId: selectedValue._id,
+                employeeId: selectedValue?._id,
               });
             }}
           />
@@ -240,7 +212,10 @@ export default function EmployeeDocumentForm(props) {
             onChange={(e) => handleAttachmentChange(e.target.files)}
             error={errors.attachment}
             required="false"
-            InputProps={{ readOnly: inputDisabled }}
+            inputProps={{
+              readOnly: inputDisabled,
+              accept: "rar",
+            }}
           />
         )}
         <Controls.Button

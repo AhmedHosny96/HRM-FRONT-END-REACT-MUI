@@ -138,7 +138,7 @@ export default function MedicalRequestForm(props) {
               />
             )}
             onChange={(event, selectedValue) => {
-              setValues({ employeeId: selectedValue._id });
+              setValues({ employeeId: selectedValue?._id });
             }}
           />
         ) : (
@@ -158,7 +158,7 @@ export default function MedicalRequestForm(props) {
               />
             )}
             onChange={(event, selectedValue) => {
-              setValues({ employeeId: selectedValue._id });
+              setValues({ employeeId: selectedValue?._id });
             }}
           />
         )}

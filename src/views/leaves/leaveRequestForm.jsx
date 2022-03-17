@@ -124,7 +124,7 @@ export default function LeaveRequestForm(props) {
             />
           )}
           onChange={(event, selectedValue) => {
-            setValues({ employeeId: selectedValue._id });
+            setValues({ employeeId: selectedValue?._id });
           }}
           inputValue={recordForEdit ? inputValue : undefined}
         />
@@ -146,7 +146,7 @@ export default function LeaveRequestForm(props) {
             />
           )}
           onChange={(event, selectedValue) => {
-            setValues({ ...values, leaveId: selectedValue._id });
+            setValues({ ...values, leaveId: selectedValue?._id });
           }}
           inputValue={recordForEdit ? inputValueLeave : undefined}
         />

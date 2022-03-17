@@ -17,7 +17,12 @@ export function saveDocument(document) {
     //update
     return http.put(API_URL + "employee/documents/" + document._id, body);
   }
-  return http.post(API_URL + "employee/documents", document);
+
+  return http.post(API_URL + "employee/documents", document, {
+    headers: {
+      "Content-Type": `multipart/form-data; boundary=${document._boundary}`,
+    },
+  });
 }
 
 export function deleteDocument(id) {

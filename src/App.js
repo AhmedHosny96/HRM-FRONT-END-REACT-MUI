@@ -63,7 +63,7 @@ const App = () => {
         <Route path="/rtl" component={RTL} />
 
         <Redirect from="/" to="/admin/dashboard" exact />
-        <Redirect from="*" to="/not-found" />
+        {/* <Redirect from="*" to="/not-found" /> */}
       </Switch>
     </React.Fragment>
   );
