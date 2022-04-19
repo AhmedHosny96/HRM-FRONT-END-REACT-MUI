@@ -176,7 +176,7 @@ export default function Users({ user }) {
       setNotify({
         isOpen: true,
         message: ex.response.data,
-        type: "success",
+        type: "error",
       });
     }
   };

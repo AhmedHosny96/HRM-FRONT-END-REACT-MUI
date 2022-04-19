@@ -47,9 +47,9 @@ const useStyles = makeStyles((theme) => ({
 const headCells = [
   { id: "employeeId", label: "Employee" },
   { id: "branchId", label: "Branch" },
-  { id: "leaveId", label: "Leave type" },
-  { id: "startDate", label: "Start date" },
-  { id: "returnDate", label: "Return date" },
+  { id: "leaveId", label: "Leave" },
+  { id: "startDate", label: "From" },
+  { id: "returnDate", label: "To" },
   { id: "requestedDays", label: "Days" },
   { id: "status", label: "Status" },
   { id: "action", label: "Action", disableSort: true },
@@ -59,7 +59,7 @@ export default function leaves({ user }) {
   const [records, setRecords] = useState([]);
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [isFetching, setIsFetching] = useState(false);
-  const [isInputDisabled, setIsInputDisabled] = useState(false);
+  const [inputDisabled, setInputDisabled] = useState(false);
 
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [notify, setNotify] = useState({
@@ -109,6 +109,7 @@ export default function leaves({ user }) {
     //open in dailog popup
     setOpenPopup(true);
     //stop populating
+    setInputDisabled(false);
   };
   const openInPopupView = (item) => {
     //set the fields to be populated
@@ -150,8 +151,6 @@ export default function leaves({ user }) {
       message: "Successfull !",
       type: "success",
     });
-
-    console.log(data);
 
     fetchData();
   };
@@ -236,40 +235,41 @@ export default function leaves({ user }) {
                   {record.status}
                 </TableCell>
                 <TableCell>
-                  {/* <Controls.ActionButton
-                    color="primary"
-                    onClick={() => {
-                      openInPopup(record), console.log(record);
-                    }}
-                    title="edit"
-                  >
-                    <ZoomInOutlined fontSize="small" />
-                  </Controls.ActionButton> */}
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record);
+                      openInPopupView(record);
                     }}
-                    title="edit"
+                    title="view"
                   >
-                    <EditOutlined fontSize="small" />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
-                  {user && user.role === "Admin" && (
-                    <Controls.ActionButton
-                      color="secondary"
-                      onClick={() =>
-                        setConfirmDialog({
-                          isOpen: true,
-                          title: "Are you sure you want to delete this ?",
-                          subTitle: "",
-                          onConfirm: () => handleDelete(record),
-                        })
-                      }
-                      title="delete"
-                    >
-                      <DeleteOutlined fontSize="small" />
-                    </Controls.ActionButton>
-                  )}
+                  {user &&
+                    user.role === "Admin" && [
+                      <Controls.ActionButton
+                        color="primary"
+                        onClick={() => {
+                          openInPopup(record);
+                        }}
+                        title="edit"
+                      >
+                        <EditOutlined fontSize="small" />
+                      </Controls.ActionButton>,
+                      <Controls.ActionButton
+                        color="secondary"
+                        onClick={() =>
+                          setConfirmDialog({
+                            isOpen: true,
+                            title: "Are you sure you want to delete this ?",
+                            subTitle: "",
+                            onConfirm: () => handleDelete(record),
+                          })
+                        }
+                        title="delete"
+                      >
+                        <DeleteOutlined fontSize="small" />
+                      </Controls.ActionButton>,
+                    ]}
                 </TableCell>
               </TableRow>
             ))}
@@ -290,7 +290,7 @@ export default function leaves({ user }) {
           recordForEdit={recordForEdit}
           setNotify={setNotify}
           postData={postData}
-          isInputDisabled={isInputDisabled}
+          inputDisabled={inputDisabled}
         />
       </Popup>
       <Notifications notify={notify} setNotify={setNotify} />

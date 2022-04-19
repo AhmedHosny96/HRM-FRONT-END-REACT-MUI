@@ -27,7 +27,7 @@ const initialValues = {
 };
 
 export default function employeeForm(props) {
-  const { recordForEdit, postData, setNotify } = props;
+  const { recordForEdit, postData, setNotify, inputDisabled } = props;
 
   const [branches, setBranches] = useState([]);
   const [jobs, setJobs] = useState([]);
@@ -112,7 +112,8 @@ export default function employeeForm(props) {
         value={values.employeeId}
         onChange={handleOnChange}
         error={errors.employeeId}
-        required
+        InputProps={{ readOnly: inputDisabled }}
+        // required
       />
       <Controls.Input
         name="fullName"
@@ -229,6 +230,7 @@ export default function employeeForm(props) {
       <Controls.Button
         text={recordForEdit ? "Update" : "Submit"}
         type="submit"
+        disabled={inputDisabled}
       />
       {/* {recordForEdit && }
       {!recordForEdit && <Controls.Button text="Submit" type="submit" />} */}

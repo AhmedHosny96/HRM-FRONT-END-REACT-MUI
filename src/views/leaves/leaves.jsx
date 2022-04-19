@@ -8,7 +8,11 @@ import {
 } from "@material-ui/core";
 import LeaveForm from "./LeaveForm.jsx";
 import { makeStyles } from "@material-ui/core/styles";
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ZoomInOutlined,
+} from "@material-ui/icons";
 import Controls from "../controls/controls";
 import Popup from "../controls/Popup";
 import { useTable } from "../common/useTable";
@@ -53,6 +57,7 @@ export default function leaves({ user }) {
   const [openPopup, setOpenPopup] = useState(false); // state variables for dialog pop up\
   const [recordForEdit, setRecordForEdit] = useState(null); // for populating data into form
   const [isFetching, setIsFetching] = useState(false);
+  const [inputDisabled, setInputDisabled] = useState(false);
 
   const [notify, setNotify] = useState({
     isOpen: false,
@@ -100,7 +105,18 @@ export default function leaves({ user }) {
     setRecordForEdit(item);
     //open in dailog popup
     setOpenPopup(true);
+
+    setInputDisabled(false);
+  };
+
+  // view
+  const openInView = (item) => {
+    //set the fields to be populated
+    setRecordForEdit(item);
+    //open in dailog popup
+    setOpenPopup(true);
     //stop populating
+    setInputDisabled(true);
   };
 
   //handle delete
@@ -196,28 +212,39 @@ export default function leaves({ user }) {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record), console.log(record);
+                      openInView(record);
                     }}
-                    title="edit"
+                    title="view"
                   >
-                    <EditOutlined fontSize="small" />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
-                  {user && user.role === "Admin" && (
-                    <Controls.ActionButton
-                      color="secondary"
-                      onClick={() =>
-                        setConfirmDialog({
-                          isOpen: true,
-                          title: "Are you sure you want to delete this ?",
-                          subTitle: "",
-                          onConfirm: () => handleDelete(record),
-                        })
-                      }
-                      title="delete"
-                    >
-                      <DeleteOutlined fontSize="small" />
-                    </Controls.ActionButton>
-                  )}
+                  {user &&
+                    user.role === "Admin" && [
+                      <Controls.ActionButton
+                        color="primary"
+                        onClick={() => {
+                          openInPopup(record);
+                        }}
+                        title="edit"
+                      >
+                        <EditOutlined fontSize="small" />
+                      </Controls.ActionButton>,
+
+                      <Controls.ActionButton
+                        color="secondary"
+                        onClick={() =>
+                          setConfirmDialog({
+                            isOpen: true,
+                            title: "Are you sure you want to delete this ?",
+                            subTitle: "",
+                            onConfirm: () => handleDelete(record),
+                          })
+                        }
+                        title="delete"
+                      >
+                        <DeleteOutlined fontSize="small" />
+                      </Controls.ActionButton>,
+                    ]}
                 </TableCell>
               </TableRow>
             ))}
@@ -238,6 +265,7 @@ export default function leaves({ user }) {
           recordForEdit={recordForEdit}
           setNotify={setNotify}
           postData={postData}
+          inputDisabled={inputDisabled}
         />
       </Popup>
       <Notifications notify={notify} setNotify={setNotify} />

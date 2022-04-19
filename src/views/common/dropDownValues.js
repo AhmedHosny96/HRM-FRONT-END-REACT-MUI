@@ -30,7 +30,7 @@ export const medicalStatus = ["Paid", "Cancelled", "Pending"];
 
 export const patient = ["staff", "spouse", "child"];
 
-export const roles = ["User", "Hr officer", "Admin"];
+export const roles = ["User", "Admin"];
 
 export const userStatus = ["Active", "Deactivated"];
 

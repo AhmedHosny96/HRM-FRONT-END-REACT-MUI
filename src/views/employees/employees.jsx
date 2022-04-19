@@ -18,7 +18,11 @@ import {
 } from "../../services/employeeService";
 import Controls from "../controls/controls";
 import UseAvatar from "views/common/useAvatar";
-import { EditOutlined, DeleteOutlined } from "@material-ui/icons/";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ZoomInOutlined,
+} from "@material-ui/icons/";
 import Popup from "../controls/Popup";
 import Notifications from "../controls/Notifications";
 import ConfirmDialog from "../controls/ConfirmDialog";
@@ -57,6 +61,7 @@ const headCells = [
 export default function Employees({ user }) {
   const classes = useStyles();
   const [isFetching, setIsFetching] = useState(false);
+  const [inputDisabled, setInputDisabled] = useState(false);
   const [records, setRecords] = useState([]);
 
   const [openPopup, setOpenPopup] = useState(false); // pop dialog
@@ -108,6 +113,14 @@ export default function Employees({ user }) {
   const openInPopup = (item) => {
     setRecordForEdit(item);
     setOpenPopup(true);
+    setInputDisabled(false);
+  };
+
+  //view
+  const openInView = (item) => {
+    setRecordForEdit(item);
+    setOpenPopup(true);
+    setInputDisabled(true);
   };
 
   //handle search bar on change
@@ -225,27 +238,39 @@ export default function Employees({ user }) {
                   <Controls.ActionButton
                     color="primary"
                     onClick={() => {
-                      openInPopup(record);
+                      openInView(record);
                     }}
-                    title="edit"
+                    title="view"
                   >
-                    <EditOutlined fontSize="small" />
+                    <ZoomInOutlined fontSize="small" />
                   </Controls.ActionButton>
-                  {user && user.role === "Admin" && (
-                    <Controls.ActionButton
-                      color="secondary"
-                      onClick={() =>
-                        setConfirmDialog({
-                          isOpen: true,
-                          title: `Are you sure you want to delete ${record.fullName} ?`,
-                          onConfirm: () => handleDelete(record),
-                        })
-                      }
-                      title="delete"
-                    >
-                      <DeleteOutlined fontSize="small" />
-                    </Controls.ActionButton>
-                  )}
+
+                  {user &&
+                    user.role === "Admin" && [
+                      <Controls.ActionButton
+                        color="primary"
+                        onClick={() => {
+                          openInPopup(record);
+                        }}
+                        title="edit"
+                      >
+                        <EditOutlined fontSize="small" />
+                      </Controls.ActionButton>,
+
+                      <Controls.ActionButton
+                        color="secondary"
+                        onClick={() =>
+                          setConfirmDialog({
+                            isOpen: true,
+                            title: `Are you sure you want to delete ${record.fullName} ?`,
+                            onConfirm: () => handleDelete(record),
+                          })
+                        }
+                        title="delete"
+                      >
+                        <DeleteOutlined fontSize="small" />
+                      </Controls.ActionButton>,
+                    ]}
                 </TableCell>
               </TableRow>
             ))}
@@ -280,6 +305,7 @@ export default function Employees({ user }) {
             recordForEdit={recordForEdit}
             postData={postData}
             setNotify={setNotify}
+            inputDisabled={inputDisabled}
           />
         </Popup>
       )}

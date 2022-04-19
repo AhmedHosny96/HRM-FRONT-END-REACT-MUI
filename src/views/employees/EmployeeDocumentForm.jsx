@@ -34,10 +34,7 @@ export default function EmployeeDocumentForm(props) {
 
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
-  const [attachment, setAttachment] = useState(null);
   const [preview, setPreview] = useState("");
-  const [progress, setProgress] = useState(0);
-  const [buffer, setBuffer] = useState(10);
 
   const { postData, recordForEdit, setNotify, inputDisabled } = props;
 
@@ -128,14 +125,6 @@ export default function EmployeeDocumentForm(props) {
 
   return (
     <div className={classes.root}>
-      {isFetching && (
-        <LinearProgress
-          variant="buffer"
-          value={progress}
-          valueBuffer={buffer}
-        />
-      )}
-      <br />
       <Form onSubmit={handleSubmit}>
         {recordForEdit ? (
           <Autocomplete

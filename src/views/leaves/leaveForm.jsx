@@ -19,7 +19,7 @@ const initialValues = {
 };
 export default function LeaveForm(props) {
   const classes = useStyles();
-  const { postData, recordForEdit, setNotify } = props;
+  const { postData, recordForEdit, setNotify, inputDisabled } = props;
 
   //validation
 
@@ -90,6 +90,7 @@ export default function LeaveForm(props) {
           value={values.leaveType}
           onChange={handleOnChange}
           error={errors.name}
+          InputProps={{ readOnly: inputDisabled }}
         />
         <Controls.Input
           name="numberOfDays"
@@ -98,6 +99,7 @@ export default function LeaveForm(props) {
           onChange={handleOnChange}
           error={errors.name}
           type="number"
+          InputProps={{ readOnly: inputDisabled }}
         />
         <Controls.Select
           name="leaveGroup"
@@ -106,9 +108,10 @@ export default function LeaveForm(props) {
           options={genders}
           onChange={handleOnChange}
           error={errors.department}
+          inputProps={{ readOnly: inputDisabled }}
         />
 
-        <Controls.Button text="Submit" type="submit" />
+        <Controls.Button text="Submit" type="submit" disabled={inputDisabled} />
       </Form>
     </div>
   );

@@ -28,7 +28,7 @@ const initialValues = {
 };
 export default function LeaveRequestForm(props) {
   const classes = useStyles();
-  const { postData, recordForEdit, setNotify, isInputDisabled } = props;
+  const { postData, recordForEdit, setNotify, inputDisabled } = props;
 
   const [inputValue, setInputValue] = useState("");
   const [inputValueLeave, setInputValueLeave] = useState("");
@@ -127,6 +127,7 @@ export default function LeaveRequestForm(props) {
             setValues({ employeeId: selectedValue?._id });
           }}
           inputValue={recordForEdit ? inputValue : undefined}
+          disableClearable={inputDisabled}
         />
 
         <Autocomplete
@@ -149,6 +150,7 @@ export default function LeaveRequestForm(props) {
             setValues({ ...values, leaveId: selectedValue?._id });
           }}
           inputValue={recordForEdit ? inputValueLeave : undefined}
+          disableClearable={inputDisabled}
         />
 
         {/* <Controls.Select
@@ -164,6 +166,7 @@ export default function LeaveRequestForm(props) {
           label="Start date"
           value={values.startDate}
           onChange={handleOnChange}
+          InputProps={{ readOnly: inputDisabled }}
         />
         <Controls.Date
           name="returnDate"
@@ -171,6 +174,7 @@ export default function LeaveRequestForm(props) {
           value={values.returnDate}
           onChange={handleOnChange}
           required
+          inputProps={{ readOnly: inputDisabled }}
         />
         {recordForEdit && (
           <Controls.Select
@@ -180,9 +184,10 @@ export default function LeaveRequestForm(props) {
             options={statuses}
             onChange={handleOnChange}
             required
+            inputProps={{ readOnly: inputDisabled }}
           />
         )}
-        <Controls.Button text="Submit" type="submit" />
+        <Controls.Button text="Submit" type="submit" disabled={inputDisabled} />
       </Form>
     </div>
   );
