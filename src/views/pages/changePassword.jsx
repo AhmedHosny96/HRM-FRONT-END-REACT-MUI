@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Grid, Avatar, Typography, CircularProgress } from "@material-ui/core";
+import React, { useState } from "react";
+import { Grid, Avatar, Typography } from "@material-ui/core";
 import { VpnKeyTwoTone } from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
